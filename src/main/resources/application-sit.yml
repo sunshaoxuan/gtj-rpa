@@ -1,0 +1,110 @@
+server:
+  port: 12345
+  undertow:
+    max-http-post-size: 0
+    io-threads: 4
+    worker-threads: 32
+    buffer-size: 1024
+    direct-buffers: true
+endpoints:
+  health:
+    #sensitive: false
+    enabled: true
+  mapping:
+    sensitive: false
+management:
+  security:
+    enabled: false
+  port: 30000
+  context-path: /monitor
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+    enabled-by-default: true
+###feign 默认关闭熔断，请看HystrixFeignConfiguration
+feign:
+  hystrix:
+    enabled: true
+  httpclient:
+    enabled: false
+    max-connections: 200
+    max-connections-per-route: 50
+  okhttp:
+    enabled: true
+  compression:
+    request:
+      min-request-size: 2048
+      mime-types: application/json
+    response:
+      enabled: true
+hystrix:
+  command:
+    default:
+      execution:
+        isolation:
+          thread:
+            timeoutInMilliseconds: 60000
+ribbon:
+  ReadTimeout: 30000
+  ConnectTimeout: 60000
+  MaxAutoRetries: 0
+  MaxAutoRetriesNextServer: 1
+spring:
+  devtools:
+    restart:
+      enabled: true
+  application:
+    name: gtj-rpa
+  zipkin:
+    base-url: http://localhost:9050
+  http:
+    multipart:
+      max-request-size: 100MB
+      max-file-size: 100MB
+  redis:
+    host: 127.0.0.1
+    port: 49153
+    password: redispw
+    database: 0
+  rabbitmq:
+    host: 127.0.0.1
+    port: 5672
+    username: guest
+    password: guest
+    virtual-host: /
+    publisher-confirms: true
+    cache:
+      connection:
+        mode: channel
+  mail:
+    host: smtp.gmail.com
+    port: 465
+    username: jesse.ni@51fanxing.co.jp
+    password: jlfcuhufnirqguco
+    default-encoding: UTF-8
+    properties:
+      mail:
+        smtp:
+          ssl:
+            enable: true
+  thymeleaf:
+    prefix: classpath:/template/
+    suffix: .html
+    mode: LEGACYHTML5
+    cache: false
+
+eureka:
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.cloud.client.ipAddress}:${server.port}
+    ##续约更新时间间隔设置5秒，m默认30s
+    lease-renewal-interval-in-seconds: 5
+    ##续约到期时间10秒，默认是90秒
+    lease-expiration-duration-in-seconds: 10
+  client:
+    service-url:
+      defaultZone: http://127.0.0.1:8100/eureka/
+logging:
+  level:
+    jp.co.gutingjun.hotel.dao.extend: trace
