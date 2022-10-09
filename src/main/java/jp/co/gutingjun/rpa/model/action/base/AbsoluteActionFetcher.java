@@ -1,7 +1,6 @@
 package jp.co.gutingjun.rpa.model.action.base;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public abstract class AbsoluteActionFetcher {
   protected abstract List<IAction> getActionList();
@@ -15,13 +14,11 @@ public abstract class AbsoluteActionFetcher {
   public IAction getAction(String simpleName) {
     try {
       return getActionList().stream()
-          .filter(
-              actionBean ->
-                  actionBean.getClass().getName().toUpperCase().contains(simpleName.toUpperCase()))
-          .collect(Collectors.toList())
-          .get(0);
+          .filter(actionBean -> actionBean.getClass().getSimpleName().equalsIgnoreCase(simpleName))
+          .findFirst()
+          .get();
     } catch (Exception ex) {
+      throw new RuntimeException(ex.getMessage());
     }
-    return null;
   }
 }

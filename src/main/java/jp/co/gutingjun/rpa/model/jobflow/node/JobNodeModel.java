@@ -15,14 +15,6 @@ import java.util.stream.Collectors;
 
 @Slf4j
 public abstract class JobNodeModel extends TreeNode<LinkNodeModel> implements IJobNode {
-  /** 工作ID */
-  private final Long id;
-
-  /** 显示名称 */
-  private String showName;
-
-  /** 当前节点标签 */
-  private String tag;
 
   /** 动作集 */
   private IAction[] actions;
@@ -31,40 +23,7 @@ public abstract class JobNodeModel extends TreeNode<LinkNodeModel> implements IJ
   private Map<String, Object> context;
 
   public JobNodeModel() {
-    id = CommonUtils.getNextID();
-  }
-
-  @Override
-  public Long getId() {
-    return id;
-  }
-
-  /**
-   * 获取工作节点显示名称
-   *
-   * @return
-   */
-  public String getShowName() {
-    return showName;
-  }
-
-  /**
-   * 设置工作节点显示名称
-   *
-   * @param showName
-   */
-  public void setShowName(String showName) {
-    this.showName = showName;
-  }
-
-  @Override
-  public String getTag() {
-    return tag;
-  }
-
-  @Override
-  public void setTag(String tag) {
-    this.tag = tag;
+    setId(CommonUtils.getNextID());
   }
 
   @Override

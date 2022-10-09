@@ -1,10 +1,8 @@
 package jp.co.gutingjun.rpa.model.bot;
 
 import jp.co.gutingjun.common.util.ObjectUtils;
-import jp.co.gutingjun.rpa.common.AfterErrorActionEnum;
-import jp.co.gutingjun.rpa.common.CommonUtils;
-import jp.co.gutingjun.rpa.common.CycleTypeEnum;
-import jp.co.gutingjun.rpa.common.FrequencyTypeEnum;
+import jp.co.gutingjun.rpa.application.action.BaseActionFetcher;
+import jp.co.gutingjun.rpa.common.*;
 import jp.co.gutingjun.rpa.model.action.base.AbsoluteActionFetcher;
 import jp.co.gutingjun.rpa.model.action.base.IAction;
 import jp.co.gutingjun.rpa.model.event.BaseEvent;
@@ -64,11 +62,10 @@ public abstract class BotModel extends EventManager implements IBot {
   }
 
   public AbsoluteActionFetcher getActionFetcher() {
+    if (actionFetcher == null) {
+      actionFetcher = new BaseActionFetcher();
+    }
     return actionFetcher;
-  }
-
-  public void setActionFetcher(AbsoluteActionFetcher actionFetcher) {
-    this.actionFetcher = actionFetcher;
   }
 
   @Override
@@ -172,12 +169,12 @@ public abstract class BotModel extends EventManager implements IBot {
       // 有任务节点及连线，递归建树
       // 创建开始节点
       currentNode = new JobBeginNode();
-
+      List<JobNodeModel> addedNodes;
       do {
         // 获取当前节点的后续连线
         fetchLinkers(settings, currentNode);
         // 获取当前节点所有连线的后续工作结点
-        List<JobNodeModel> addedNodes = fetchLinkedJobNodes(settings, currentNode);
+        addedNodes = fetchLinkedJobNodes(settings, currentNode);
         if (addedNodes.size() > 0) {
           addedJobNodes.addAll(addedNodes);
           fetchedJobNodes.add(currentNode.getTag());
@@ -185,7 +182,8 @@ public abstract class BotModel extends EventManager implements IBot {
         } else {
           break;
         }
-      } while ((!isAllNodeFetched(addedJobNodes, fetchedJobNodes)));
+      } // while ((!isAllNodeFetched(addedJobNodes, fetchedJobNodes)));
+      while (addedNodes.size() > 0);
 
       // 补充结束节点
       addedJobNodes.stream()
@@ -196,9 +194,12 @@ public abstract class BotModel extends EventManager implements IBot {
                 BaseLinkNode newTrueLink = new BaseLinkNode();
                 newTrueLink.appendChild(endNode);
                 newTrueLink.setParent(node);
+                newTrueLink.setShowName("无条件结束");
                 endNode.setParent(newTrueLink);
                 node.appendChild(newTrueLink);
               });
+
+      setJobNode((JobNodeModel) currentNode.getRoot());
     }
   }
 
@@ -213,7 +214,12 @@ public abstract class BotModel extends EventManager implements IBot {
     return fetchedJobNodes.stream()
             .filter(
                 nodeTag ->
-                    addedJobNodes.stream().filter(node -> node.getTag().equals(nodeTag)).count()
+                    addedJobNodes.stream()
+                            .filter(
+                                node ->
+                                    (node.getTag() == null && nodeTag == null)
+                                        || node.getTag().equals(nodeTag))
+                            .count()
                         > 0)
             .count()
         == addedJobNodes.size();
@@ -236,6 +242,7 @@ public abstract class BotModel extends EventManager implements IBot {
                         .forEach(
                             job -> {
                               JobActionNode newJobNode = new JobActionNode();
+                              newJobNode.setShowName((String) job.get("showName"));
                               newJobNode.setParent(linkNode);
                               newJobNode.setTag((String) job.get("id"));
                               AbsoluteActionFetcher actionFetcher = getActionFetcher();
@@ -264,6 +271,7 @@ public abstract class BotModel extends EventManager implements IBot {
                 linker -> {
                   BaseLinkNode newLinkNode = new BaseLinkNode();
                   newLinkNode.setParent(currentNode);
+                  newLinkNode.setShowName((String) linker.get("showName"));
                   newLinkNode.setRuleCondition((Map<String, Object>) linker.get("rule"));
                   newLinkNode.setPriorTag((String) linker.get("from"));
                   newLinkNode.setNextTag((String) linker.get("to"));
@@ -277,6 +285,9 @@ public abstract class BotModel extends EventManager implements IBot {
       ((Map<String, Object>) botSettings.get("bot"))
           .forEach((key, value) -> ObjectUtils.setFieldValue(this, key, value));
     }
+
+    setCreatedTime(new Date());
+    setCreatedBy(LoginContext.getUserid());
   }
 
   @Override

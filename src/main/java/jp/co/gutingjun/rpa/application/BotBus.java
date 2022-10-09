@@ -14,7 +14,10 @@ import org.springframework.scheduling.annotation.Scheduled;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -27,19 +30,19 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class BotBus implements Serializable {
   /** 机器人候选者集合 */
-  private static HashSet<BotModel> candidateSet = new HashSet<>();
+  private static final HashSet<BotModel> candidateSet = new HashSet<>();
 
   /** 周期执行机器人合格候选者 */
-  private static HashSet<BotModel> cycleQualifiedCandidates = new HashSet<>();
+  private static final HashSet<BotModel> cycleQualifiedCandidates = new HashSet<>();
 
   /** 机器人实例缓存 */
-  private static Queue<BotInstance> botInstanceCache = new LinkedList<>();
+  private static final Queue<BotInstance> botInstanceCache = new LinkedList<>();
 
   /** 执行中机器人集合 */
-  private static HashSet<BotInstance> executingBot = new HashSet<>();
+  private static final HashSet<BotInstance> executingBot = new HashSet<>();
 
   /** 机器人运行线程池 */
-  private static ExecutorService executeService =
+  private static final ExecutorService executeService =
       Executors.newFixedThreadPool(BotConfig.getExecutionPoolSize());
 
   /**
@@ -77,10 +80,24 @@ public class BotBus implements Serializable {
    * @throws Exception
    */
   public static BotModel botRegister(String botContext) throws Exception {
-    Map<String, Object> botSettingMap = JsonUtils.json2Map(botContext);
     BotModel newBot = new SimpleBot(JsonUtils.json2Map(botContext));
-    getCandidateSet().add(newBot);
-    return newBot;
+    AtomicBoolean added = new AtomicBoolean(false);
+    if (getCandidateSet().size() == 0) {
+      getCandidateSet().add(newBot);
+      added.set(true);
+    } else {
+      getCandidateSet()
+          .forEach(
+              candidate -> {
+                if (candidate.getClass().equals(newBot.getClass())) {
+                  if (!candidate.isSingleton()) {
+                    getCandidateSet().add(newBot);
+                    added.set(true);
+                  }
+                }
+              });
+    }
+    return added.get() ? newBot : null;
   }
 
   /**
@@ -92,9 +109,7 @@ public class BotBus implements Serializable {
     return botInstanceCache;
   }
 
-  /**
-   * 扫描候选机器人清单，触发周期执行机器人
-   */
+  /** 扫描候选机器人清单，触发周期执行机器人 */
   @Scheduled(cron = "0/1 * * * * ?")
   public static void scanCandidates() {
     if (getCandidateSet().size() > 0) {
@@ -133,33 +148,33 @@ public class BotBus implements Serializable {
 
   /**
    * 实例化机器人，将实例推入执行缓冲
+   *
    * @param botModel
    */
   private static void InstantiateBot(BotModel botModel) {
     BotInstance newBot = new BotInstance();
     newBot.buildBot(botModel);
-    //监听机器人执行结束事件，叶子节点执行结束后视为机器人任务结束
+    // 监听机器人执行结束事件，叶子节点执行结束后视为机器人任务结束
     newBot.registerEvent(
         EventTypeEnum.FINISH,
-            (IEventHandler<BaseEvent>) event -> {
+        (IEventHandler<BaseEvent>)
+            event -> {
               if (event.getSoureObject() instanceof JobNodeModel) {
                 if (((JobNodeModel) event.getSoureObject()).isLeaf()) {
-                  //机器节点结束在叶子结点，该机器人执行结束
+                  // 机器节点结束在叶子结点，该机器人执行结束
                   getExecutingBot().remove(event.getSoureObject());
                 }
               }
             });
   }
 
-  /**
-   * 扫描机器人执行缓冲，将缓存中的机器人推入执行线程
-   */
+  /** 扫描机器人执行缓冲，将缓存中的机器人推入执行线程 */
   @Scheduled(cron = "0/1 * * * * ?")
   public static void runBot() {
     while (getBotInstanceCache().size() > 0) {
       BotInstance bot = getBotInstanceCache().poll();
       if (!getExecutingBot().contains(bot)) {
-        //避免重复执行
+        // 避免重复执行
         getExecuteService().execute(bot);
         getExecutingBot().add(bot);
       }

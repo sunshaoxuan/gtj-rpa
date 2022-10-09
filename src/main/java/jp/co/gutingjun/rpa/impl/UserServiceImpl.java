@@ -24,7 +24,6 @@ public class UserServiceImpl implements IUserService {
   @Autowired JavaMailSender mailSender;
   @Autowired RedisService redisService;
 
-
   @Override
   public void createUser(String username, String email, String password, boolean isAdmin)
       throws RuntimeException {
@@ -55,6 +54,19 @@ public class UserServiceImpl implements IUserService {
     BotConfig.saveUsers(userMap);
 
     sendVerifyEmail(username, email, (String) ((HashMap) userMap.get(username)).get("verifycode"));
+  }
+
+  @Override
+  public Long getUserId(String username) {
+    Long id = -1L;
+    if (username.equalsIgnoreCase("ROOT")) {
+      id = 99999L;
+    } else {
+      HashMap userMap = BotConfig.getUsers();
+      id = userMap.containsKey(username) ? (Long) ((HashMap) userMap.get(username)).get("id") : -1L;
+    }
+
+    return id;
   }
 
   private void sendVerifyEmail(String username, String email, String verifyCode) {
@@ -104,7 +116,7 @@ public class UserServiceImpl implements IUserService {
       }
 
       if (!StringUtils.isBlank(email)) {
-        if (!email.equals(((HashMap) userMap.get(username)))) {
+        if (!email.equals(userMap.get(username))) {
           resetUserEmail(username, email, userMap);
           isModified = true;
           sendVerifyEmail(
@@ -132,8 +144,8 @@ public class UserServiceImpl implements IUserService {
     HashMap userMap = BotConfig.getUsers();
     if (userMap != null && userMap.containsKey(username)) {
       if (verifyCode.equals(((HashMap) userMap.get(username)).get("verifycode"))) {
-        ((HashMap)userMap.get(username)).put("verified", true);
-        ((HashMap)userMap.get(username)).put("verifycode", null);
+        ((HashMap) userMap.get(username)).put("verified", true);
+        ((HashMap) userMap.get(username)).put("verifycode", null);
         BotConfig.saveUsers(userMap);
       } else {
         throw new RuntimeException("Verify failed: Verify code not matched.");

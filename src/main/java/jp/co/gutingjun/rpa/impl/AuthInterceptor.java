@@ -10,33 +10,36 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.Objects;
 
 public class AuthInterceptor implements HandlerInterceptor {
-    @Autowired
-    private RedisService redisService;
+  @Autowired private RedisService redisService;
 
-    @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        response.setCharacterEncoding("UTF-8");
-        response.setContentType("text/html;charset=utf-8");
-        String token = request.getHeader("token");
+  @Override
+  public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
+      throws Exception {
+    response.setCharacterEncoding("UTF-8");
+    response.setContentType("text/html;charset=utf-8");
+    String token = request.getHeader("token");
     if (StringUtils.isEmpty(token)) {
-            response.getWriter().print("User do not login.");
-            return false;
-        }
-        Object loginStatus = redisService.get(token);
-        if( Objects.isNull(loginStatus)){
-            response.getWriter().print("token error.");
-            return false;
-        }
-        return true;
+      response.getWriter().print("User do not login.");
+      return false;
     }
-
-    @Override
-    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
-
+    Object loginStatus = redisService.get(token);
+    if (Objects.isNull(loginStatus)) {
+      response.getWriter().print("token error.");
+      return false;
     }
+    return true;
+  }
 
-    @Override
-    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+  @Override
+  public void postHandle(
+      HttpServletRequest request,
+      HttpServletResponse response,
+      Object handler,
+      ModelAndView modelAndView)
+      throws Exception {}
 
-    }
+  @Override
+  public void afterCompletion(
+      HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex)
+      throws Exception {}
 }

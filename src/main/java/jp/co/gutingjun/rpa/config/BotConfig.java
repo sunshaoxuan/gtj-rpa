@@ -13,26 +13,22 @@ import java.util.*;
 
 @Slf4j
 public class BotConfig {
-  /** 运行池大小 */
-  private static int executionPoolSize = 5;
-
-  public static int getExecutionPoolSize() {
-    return executionPoolSize;
-  }
-
   /** TOKEN过期小时数 */
   public static final int TK_EXPIRE_HOURS = 72;
-
   /** TOKEN公钥 */
   public static final String TK_PUB_KEY = "59xv55/nOpFko/zOzAuF3h/hucmyrXyk";
 
   public static final String US_PUB_KEY = "zWeZaEn6vOAuuH90NYxjUe6U5xGWDGyD";
-
+  /** 运行池大小 */
+  private static final int executionPoolSize = 5;
   /** 设置数据文件存放路径 */
-  private static String configFilePath = "..//config//";
-
+  private static final String configFilePath = "..//config//";
   /** 用户设置文件名 */
-  private static String userConfigFile = "userconfig.cfg";
+  private static final String userConfigFile = "userconfig.cfg";
+
+  public static int getExecutionPoolSize() {
+    return executionPoolSize;
+  }
 
   /**
    * 取用户设置文件路径

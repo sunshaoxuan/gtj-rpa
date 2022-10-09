@@ -36,7 +36,9 @@ public class BaseLinkNode extends LinkNodeModel {
           LogicalCondition.getCondition(
               rootCondition.get().getKey(),
               rootCondition.get().getValue(),
-              getParent().getActions()[0]);
+              getParent().getActions() == null || getParent().getActions().length == 0
+                  ? null
+                  : getParent().getActions()[0]);
       setRuleCondition(condition);
     }
   }

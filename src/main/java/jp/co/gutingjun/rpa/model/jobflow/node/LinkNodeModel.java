@@ -8,9 +8,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public abstract class LinkNodeModel extends TreeNode<JobNodeModel> implements ILinkNode {
-  /** 工作ID */
-  private Long id;
-
   /** 环境变量集合 */
   private Map<String, Object> context;
 
@@ -20,8 +17,9 @@ public abstract class LinkNodeModel extends TreeNode<JobNodeModel> implements IL
   /** 下级节点标签 */
   private String nextTag;
 
-  /** 当前节点标签 */
-  private String tag;
+  public LinkNodeModel() {
+    setId(CommonUtils.getNextID());
+  }
 
   public String getPriorTag() {
     return PriorTag;
@@ -40,16 +38,6 @@ public abstract class LinkNodeModel extends TreeNode<JobNodeModel> implements IL
   }
 
   @Override
-  public String getTag() {
-    return tag;
-  }
-
-  @Override
-  public void setTag(String tag) {
-    this.tag = tag;
-  }
-
-  @Override
   public Map<String, Object> getContext() {
     if (context == null) {
       context = new HashMap<>();
@@ -60,20 +48,6 @@ public abstract class LinkNodeModel extends TreeNode<JobNodeModel> implements IL
   @Override
   public void setContext(Map<String, Object> context) {
     this.context = context;
-  }
-
-  @Override
-  public Long getId() {
-    return id;
-  }
-
-  /**
-   * 取连线目标节点
-   *
-   * @return
-   */
-  public JobNodeModel getNextNode() {
-    return getChildAt(0);
   }
 
   /**
@@ -88,10 +62,6 @@ public abstract class LinkNodeModel extends TreeNode<JobNodeModel> implements IL
   @Override
   public final NodeTypeEnum getNoteType() {
     return NodeTypeEnum.LINKNODE;
-  }
-
-  public LinkNodeModel() {
-    id = CommonUtils.getNextID();
   }
 
   @Override
