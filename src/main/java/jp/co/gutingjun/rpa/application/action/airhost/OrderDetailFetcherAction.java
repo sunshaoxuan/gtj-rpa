@@ -1,11 +1,14 @@
 package jp.co.gutingjun.rpa.application.action.airhost;
 
+import jp.co.gutingjun.rpa.common.RPAConst;
 import org.springframework.stereotype.Component;
 
 @Component
 public class OrderDetailFetcherAction extends DocDetailFORMFetcherActionModel {
   public OrderDetailFetcherAction() {
-    getWebContext().put(URL, "https://cloud.airhost.co/en/bookings/" + TAG_ORDERID + "/edit");
+    getContext()
+        .put(
+            RPAConst.URL, "https://cloud.airhost.co/en/bookings/" + RPAConst.TAG_ORDERID + "/edit");
   }
 
   @Override

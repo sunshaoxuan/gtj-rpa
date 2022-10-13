@@ -1,8 +1,9 @@
 package jp.co.gutingjun.rpa.model.action.base;
 
+import java.io.Serializable;
 import java.util.List;
 
-public abstract class AbsoluteActionFetcher {
+public abstract class AbsoluteActionFetcher implements Serializable {
   protected abstract List<IAction> getActionList();
 
   /**

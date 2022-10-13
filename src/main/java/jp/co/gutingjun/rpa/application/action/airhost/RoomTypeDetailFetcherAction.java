@@ -1,17 +1,19 @@
 package jp.co.gutingjun.rpa.application.action.airhost;
 
+import jp.co.gutingjun.rpa.common.RPAConst;
+
 import java.util.HashMap;
 import java.util.Map;
 
 public class RoomTypeDetailFetcherAction extends DataRESTFetcherActionModel {
   public RoomTypeDetailFetcherAction() {
-    getWebContext()
+    getContext()
         .put(
-            URL,
+            RPAConst.URL,
             "https://cloud.airhost.co/en/houses/"
-                + TAG_HOUSEID
+                + RPAConst.TAG_HOUSEID
                 + "/rooms/"
-                + TAG_ROOMTYPEID
+                + RPAConst.TAG_ROOMTYPEID
                 + ".json");
     appendDependActionClasses(UserPasswordLoginAction.class);
   }
@@ -21,6 +23,6 @@ public class RoomTypeDetailFetcherAction extends DataRESTFetcherActionModel {
     Map<String, Object> result = new HashMap<>();
     Map dataMap = fetchData();
     result.put(String.valueOf(getRoomTypeId()), dataMap);
-    return  dataMap;
+    return dataMap;
   }
 }

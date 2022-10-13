@@ -1,6 +1,7 @@
 package jp.co.gutingjun.rpa.application.action.airhost;
 
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import jp.co.gutingjun.rpa.common.RPAConst;
 import org.junit.jupiter.api.Test;
 import org.wildfly.common.Assert;
 
@@ -9,14 +10,10 @@ class UserPasswordLoginActionTest {
   @Test
   void doAction() {
     UserPasswordLoginAction action = new UserPasswordLoginAction();
-    action
-        .getWebContext()
-        .put(UserPasswordLoginAction.URL, "https://cloud.airhost.co/accounts/sign_in");
-    action.getWebContext().put(UserPasswordLoginAction.USERNAME, "sun.shaoxuan@51fanxing.co.jp");
-    action.getWebContext().put(UserPasswordLoginAction.PASSWORD, "1qaz@WSX");
-    action
-        .getWebContext()
-        .put(UserPasswordLoginAction.LOADPAGE_AFTERLOGIN, "https://cloud.airhost.co/en/dashboard");
+    action.getContext().put(RPAConst.URL, "https://cloud.airhost.co/accounts/sign_in");
+    action.getContext().put(RPAConst.USERNAME, "sun.shaoxuan@51fanxing.co.jp");
+    action.getContext().put(RPAConst.PASSWORD, "1qaz@WSX");
+    action.getContext().put(RPAConst.LOADPAGE_AFTERLOGIN, "https://cloud.airhost.co/en/dashboard");
     action.execute();
 
     Object outputData = action.getOutputData();
@@ -27,8 +24,7 @@ class UserPasswordLoginActionTest {
                       .filter(
                           ele ->
                               ele.getAttribute("alt")
-                                  .equals(
-                                      action.getWebContext().get(UserPasswordLoginAction.USERNAME)))
+                                  .equals(action.getContext().get(RPAConst.USERNAME)))
                       .count()
               > 0);
     }

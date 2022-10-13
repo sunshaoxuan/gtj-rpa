@@ -20,7 +20,7 @@ public class BotConfig {
 
   public static final String US_PUB_KEY = "zWeZaEn6vOAuuH90NYxjUe6U5xGWDGyD";
   /** 运行池大小 */
-  private static final int executionPoolSize = 5;
+  private static final int executionPoolSize = 10;
   /** 设置数据文件存放路径 */
   private static final String configFilePath = "..//config//";
   /** 用户设置文件名 */

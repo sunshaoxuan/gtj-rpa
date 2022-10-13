@@ -38,7 +38,7 @@ public class BotRest {
   @ResponseBody
   public R botRegister(@RequestBody String botContext) {
     try {
-      IBot bot = BotBus.botRegister(botContext);
+      IBot bot = BotBus.getInstance().botRegister(botContext);
       if (bot == null) {
         return R.responseByError(200, "Bot exists.");
       } else {
@@ -54,7 +54,7 @@ public class BotRest {
   @ResponseBody
   public R botList() {
     List<Map<String, Object>> rtn = new ArrayList<Map<String, Object>>();
-    HashSet<BotModel> candidateSet = BotBus.getCandidateSet();
+    HashSet<BotModel> candidateSet = BotBus.getInstance().getCandidateSet();
     candidateSet.forEach(
         bot -> {
           Map<String, Object> oneBot = fetchBotInfo(bot);
@@ -106,7 +106,7 @@ public class BotRest {
   @PostMapping(value = "/removebot")
   @ResponseBody
   public R removeBot(@RequestBody BotInfoDTO dto) {
-    HashSet<BotModel> candidateSet = BotBus.getCandidateSet();
+    HashSet<BotModel> candidateSet = BotBus.getInstance().getCandidateSet();
     candidateSet.removeIf(bot -> bot.getId().equals(dto.getId()));
     return R.responseBySuccess();
   }
@@ -116,7 +116,7 @@ public class BotRest {
   @ResponseBody
   public R runningBotList() {
     List<Map<String, Object>> runningSet = new ArrayList<Map<String, Object>>();
-    HashSet<BotInstance> runningbots = BotBus.getExecutingBot();
+    HashSet<BotInstance> runningbots = BotBus.getInstance().getExecutingBot();
     runningbots.forEach(
         bot -> {
           Map<String, Object> oneBot = fetchBotInfo(bot);
@@ -128,8 +128,8 @@ public class BotRest {
   @ApiOperation(value = "机器人手工启动", notes = "机器人手工启动")
   @PostMapping(value = "/botmanualstart")
   @ResponseBody
-  public R botStart(@RequestBody Long botID) {
-    BotBus.manualExecuteBot(botID);
+  public R botStart(@RequestBody BotInfoDTO dto) {
+    BotBus.getInstance().manualExecuteBot(dto.getId());
     return R.responseBySuccess();
   }
 

@@ -2,6 +2,7 @@ package jp.co.gutingjun.rpa.application.action.airhost;
 
 import com.gargoylesoftware.htmlunit.html.*;
 import jp.co.gutingjun.rpa.common.CommonUtils;
+import jp.co.gutingjun.rpa.common.RPAConst;
 import jp.co.gutingjun.rpa.model.action.web.WebClientActionModel;
 import org.apache.commons.lang.StringUtils;
 
@@ -10,16 +11,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 public abstract class DocDetailFORMFetcherActionModel extends WebClientActionModel {
-  final String TAG_HOUSEID = "$HOUSEID$";
-
-  final String TAG_ROOMID = "$ROOMID$";
-
-  final String TAG_ROOMTYPEID = "$ROOMTYPEID$";
-
-  final String TAG_ORDERID = "$ORDERID$";
-
   /** 房源ID */
   private Long houseId;
+  /** 房间ID */
+  private Long roomId;
+
+  private Long roomTypeId;
+  /** 订单ID */
+  private Long orderId;
+
+  private String formId;
 
   public Long getHouseId() {
     return houseId;
@@ -29,9 +30,6 @@ public abstract class DocDetailFORMFetcherActionModel extends WebClientActionMod
     this.houseId = houseId;
   }
 
-  /** 房间ID */
-  private Long roomId;
-
   public Long getRoomId() {
     return roomId;
   }
@@ -39,8 +37,6 @@ public abstract class DocDetailFORMFetcherActionModel extends WebClientActionMod
   public void setRoomId(Long roomId) {
     this.roomId = roomId;
   }
-
-  private Long roomTypeId;
 
   public Long getRoomTypeId() {
     return roomTypeId;
@@ -50,9 +46,6 @@ public abstract class DocDetailFORMFetcherActionModel extends WebClientActionMod
     this.roomTypeId = roomTypeId;
   }
 
-  /** 订单ID */
-  private Long orderId;
-
   public Long getOrderId() {
     return orderId;
   }
@@ -60,8 +53,6 @@ public abstract class DocDetailFORMFetcherActionModel extends WebClientActionMod
   public void setOrderId(Long orderId) {
     this.orderId = orderId;
   }
-
-  private String formId;
 
   public String getFormId() {
     return formId;
@@ -74,12 +65,12 @@ public abstract class DocDetailFORMFetcherActionModel extends WebClientActionMod
   protected Map fetchDataMap() {
     Map<String, String> fetchedDataMap = new HashMap<>();
     try {
-      String url = (String) getWebContext().get(URL);
+      String url = (String) getContext().get(RPAConst.URL);
       url =
-          url.replace(TAG_HOUSEID, String.valueOf(getHouseId()))
-              .replace(TAG_ROOMID, String.valueOf(getRoomId()))
-                  .replace(TAG_ROOMTYPEID, String.valueOf(getRoomTypeId()))
-              .replace(TAG_ORDERID, String.valueOf(getOrderId()));
+          url.replace(RPAConst.TAG_HOUSEID, String.valueOf(getHouseId()))
+              .replace(RPAConst.TAG_ROOMID, String.valueOf(getRoomId()))
+              .replace(RPAConst.TAG_ROOMTYPEID, String.valueOf(getRoomTypeId()))
+              .replace(RPAConst.TAG_ORDERID, String.valueOf(getOrderId()));
       HtmlPage page = getWebClient().getPage(url);
       getWebClient().waitForBackgroundJavaScript(10000);
       HtmlForm form =

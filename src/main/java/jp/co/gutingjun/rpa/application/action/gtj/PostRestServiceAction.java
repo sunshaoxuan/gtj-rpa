@@ -5,8 +5,9 @@ import com.gargoylesoftware.htmlunit.UnexpectedPage;
 import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.WebResponse;
 import jp.co.gutingjun.common.util.JsonUtils;
+import jp.co.gutingjun.rpa.common.RPAConst;
 import jp.co.gutingjun.rpa.model.action.web.WebClientActionModel;
-import jp.co.gutingjun.rpa.model.action.web.WebDriverActionModel;
+import org.apache.commons.lang.StringUtils;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.springframework.stereotype.Component;
 
@@ -16,23 +17,25 @@ import java.util.Map;
 
 @Component
 public class PostRestServiceAction extends WebClientActionModel {
-  public static final String TAG_COOKIE_ACCESSTOKEN = "access_token";
+  private String token;
 
   public PostRestServiceAction() {
     appendDependActionClasses(UserPassCodeLoginAction.class);
   }
 
-  private String token;
-
   @Override
   public String getAccessToken() {
-    if (getWebContext().get(WebDriverActionModel.WEBDRIVER) != null) {
+    if (!StringUtils.isBlank(super.getAccessToken())) {
+      token = super.getAccessToken();
+    } else if (getContext().containsKey(RPAConst.ACCESSTOKEN)) {
+      token = (String) getContext().get(RPAConst.ACCESSTOKEN);
+    } else if (getContext().get(RPAConst.WEBDRIVER) != null) {
       // 如果上下文中存在WebDriver，说明从上节点已经通过了认证
-      RemoteWebDriver driver =
-          (RemoteWebDriver) getWebContext().get(WebDriverActionModel.WEBDRIVER);
-      token = driver.manage().getCookieNamed(TAG_COOKIE_ACCESSTOKEN).getValue();
+      RemoteWebDriver driver = (RemoteWebDriver) getContext().get(RPAConst.WEBDRIVER);
+      token = driver.manage().getCookieNamed(RPAConst.TAG_COOKIE_ACCESSTOKEN).getValue();
     } else if (getWebClient() != null) {
-      token = getWebClient().getCookieManager().getCookie(TAG_COOKIE_ACCESSTOKEN).getValue();
+      token =
+          getWebClient().getCookieManager().getCookie(RPAConst.TAG_COOKIE_ACCESSTOKEN).getValue();
     } else {
       token = null;
     }
@@ -45,7 +48,8 @@ public class PostRestServiceAction extends WebClientActionModel {
   protected Object doAction(Object inputData) {
     try {
       WebRequest request =
-          new WebRequest(new java.net.URL((String) getWebContext().get(URL)), HttpMethod.POST);
+          new WebRequest(
+              new java.net.URL((String) getContext().get(RPAConst.URL)), HttpMethod.POST);
       request.setRequestBody(
           JsonUtils.map2JSON(
               new ArrayList<Map<String, Object>>(

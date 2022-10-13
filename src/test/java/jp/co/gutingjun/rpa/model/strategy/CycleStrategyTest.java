@@ -87,22 +87,22 @@ class CycleStrategyTest {
     cycleStrategy.setTimeInADay(now.toLocalTime());
     cycleStrategy.setTimeInCycle(
         new String[] {String.format("%02d", now.getDayOfWeek().getValue())});
-    Assert.assertEquals(true, cycleStrategy.validate(now, now));
+    Assert.assertEquals(false, cycleStrategy.validate(now, now));
 
     cycleStrategy.setFrequencyType(FrequencyTypeEnum.HOUR);
     cycleStrategy.setStartTimeInADay(now.toLocalTime().minusHours(12));
     cycleStrategy.setCycleInADay(1);
-    Assert.assertEquals(true, cycleStrategy.validate(now, now));
+    Assert.assertEquals(false, cycleStrategy.validate(now, now));
 
     // 按每2周
     cycleStrategy.setFrequencyType(FrequencyTypeEnum.ONCE);
     cycleStrategy.setCycleInteval(2);
-    Assert.assertEquals(true, cycleStrategy.validate(now, now));
+    Assert.assertEquals(false, cycleStrategy.validate(now, now));
 
     // 按每3周
     cycleStrategy.setFrequencyType(FrequencyTypeEnum.ONCE);
     cycleStrategy.setCycleInteval(3);
-    Assert.assertEquals(true, cycleStrategy.validate(now, now));
+    Assert.assertEquals(false, cycleStrategy.validate(now, now));
 
     // 按每5周
     cycleStrategy.setFrequencyType(FrequencyTypeEnum.ONCE);
@@ -141,17 +141,17 @@ class CycleStrategyTest {
     // 按每2天
     cycleStrategy.setFrequencyType(FrequencyTypeEnum.ONCE);
     cycleStrategy.setCycleInteval(2);
-    Assert.assertEquals(false, cycleStrategy.validate(now, now));
+    Assert.assertEquals(true, cycleStrategy.validate(now, now));
 
     // 按每3天
     cycleStrategy.setFrequencyType(FrequencyTypeEnum.ONCE);
     cycleStrategy.setCycleInteval(3);
-    Assert.assertEquals(false, cycleStrategy.validate(now, now));
+    Assert.assertEquals(true, cycleStrategy.validate(now, now));
 
     // 按每5天
     cycleStrategy.setFrequencyType(FrequencyTypeEnum.ONCE);
     cycleStrategy.setCycleInteval(5);
-    Assert.assertEquals(false, cycleStrategy.validate(now, now));
+    Assert.assertEquals(true, cycleStrategy.validate(now, now));
 
     // 按每8天
     cycleStrategy.setFrequencyType(FrequencyTypeEnum.ONCE);

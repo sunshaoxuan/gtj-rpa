@@ -28,7 +28,11 @@ public abstract class JobNodeModel extends TreeNode<LinkNodeModel> implements IJ
 
   @Override
   public IAction[] getActions() {
-    return new IAction[0];
+    if (actions == null) {
+      actions = new IAction[0];
+    }
+
+    return actions;
   }
 
   @Override
@@ -73,14 +77,14 @@ public abstract class JobNodeModel extends TreeNode<LinkNodeModel> implements IJ
 
               // 将上一动作环境变量传递给下一动作使用
               if (actionContext.size() > 0) {
-                action.getContext().putAll(actionContext);
+                CommonUtils.mapPutAll(action.getContext(), actionContext);
               }
 
               // 输出数据采集
               outputData.put(action.getClass().getName() + "[" + getId() + "]", action.execute());
 
               // 缓存本动作执行后的环境变更
-              actionContext.putAll(action.getContext());
+              CommonUtils.mapPutAll(actionContext, action.getContext());
             });
 
     Map<String, Object> lastStepOutputData = new HashMap<>();
@@ -95,7 +99,7 @@ public abstract class JobNodeModel extends TreeNode<LinkNodeModel> implements IJ
                 // 执行连线评估
                 if (linker.eval()) {
                   // 将“上一节点输出数据”传递给下一节点环境变量
-                  linker.getNextNode().setContext(lastStepOutputData);
+                  CommonUtils.mapPutAll(linker.getNextNode().getContext(), lastStepOutputData);
                   // 将当前节点环境变更传递给下一节点
                   CommonUtils.mapPutAll(linker.getNextNode().getContext(), getContext());
                   // 执行评估结果为真的下级工作节点

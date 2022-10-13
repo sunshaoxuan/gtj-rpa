@@ -13,15 +13,11 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Date;
 
-/**
- * 周期策略
- */
+/** 周期策略 */
 @Data
 @NoArgsConstructor
 public class CycleStrategy implements IBotStrategy {
-  /**
-   * 策略名称
-   */
+  /** 策略名称 */
   private String name;
 
   /** 策略周期类型 */
@@ -30,11 +26,10 @@ public class CycleStrategy implements IBotStrategy {
   /** 周期间隔 */
   private int cycleInteval;
 
-  /**策略有效期开始时间*/
-  @NotNull
-  private LocalDateTime cycleBeginTime;
+  /** 策略有效期开始时间 */
+  @NotNull private LocalDateTime cycleBeginTime;
 
-  /**策略有效期结束时间*/
+  /** 策略有效期结束时间 */
   private LocalDateTime cycleEndTime;
 
   /**
@@ -62,14 +57,13 @@ public class CycleStrategy implements IBotStrategy {
   private int cycleInADay;
 
   /**
-   * <b>一天内按频率发生的起始时间点</b><br/>
+   * <b>一天内按频率发生的起始时间点</b><br>
    * 时间点格式：HH:mm:ss
    */
-  @NotNull
-  private LocalTime startTimeInADay;
+  @NotNull private LocalTime startTimeInADay;
 
   /**
-   * <b>一天内按频率发生的结束时间点</b><br/>
+   * <b>一天内按频率发生的结束时间点</b><br>
    * 时间点格式：HH:mm:ss
    */
   private LocalTime endTimeInADay;
@@ -83,7 +77,7 @@ public class CycleStrategy implements IBotStrategy {
   }
 
   @Override
-  public void setName(String value){
+  public void setName(String value) {
     name = value;
   }
 
@@ -152,19 +146,15 @@ public class CycleStrategy implements IBotStrategy {
           }
         }
 
-        if (sourceValue.equals(checkTime)
-            && (checkTime.isEqual(curDateStartTime) || checkTime.isAfter(curDateStartTime))
-            && (checkTime.isEqual(curDateEndTime) || checkTime.isBefore(curDateEndTime))) {
-          return true;
-        }
+        return sourceValue.equals(checkTime)
+                && (checkTime.isEqual(curDateStartTime) || checkTime.isAfter(curDateStartTime))
+                && (checkTime.isEqual(curDateEndTime) || checkTime.isBefore(curDateEndTime));
       } else {
         // 当天仅执行一次，检查执行时间是否匹配
         // 一天只发生一次时间不为空
         // 取当前日期拼接时间
         LocalDateTime checkTime = LocalDateTime.parse(now.toLocalDate() + "T" + getTimeInADay());
-        if (checkTime.isEqual(sourceValue)) {
-          return true;
-        }
+        return checkTime.isEqual(sourceValue);
       }
     }
 
@@ -174,8 +164,10 @@ public class CycleStrategy implements IBotStrategy {
   private boolean isTodayRun(LocalDateTime sourceValue) {
     boolean todayRun = false;
     LocalDate checkDate = getCycleBeginTime().toLocalDate();
-    while (sourceValue.toLocalDate().isAfter(checkDate)) {
-      checkDate = checkDate.plusDays(getCycleInteval());
+    if (getCycleInteval() > 0) {
+      while (sourceValue.toLocalDate().isAfter(checkDate)) {
+        checkDate = checkDate.plusDays(getCycleInteval());
+      }
     }
     // 当天不执行，直接返回False
     if (checkDate.isEqual(sourceValue.toLocalDate())) {
@@ -190,16 +182,16 @@ public class CycleStrategy implements IBotStrategy {
     LocalDate checkBeginDate =
         getCycleBeginTime().toLocalDate().minusDays(getCycleBeginTime().getDayOfMonth() - 1);
     LocalDate checkEndDate =
-        getCycleBeginTime()
-            .toLocalDate()
-            .plusDays(7 - getCycleBeginTime().getDayOfMonth() + 1);
+        getCycleBeginTime().toLocalDate().plusDays(7 - getCycleBeginTime().getDayOfMonth() + 1);
     while (sourceValue.toLocalDate().isAfter(checkBeginDate)) {
       checkBeginDate = checkBeginDate.plusWeeks(getCycleInteval());
       checkEndDate = checkEndDate.plusWeeks(getCycleInteval());
     }
     // 当周执行，再判断当天是否执行
-    if ((sourceValue.toLocalDate().isAfter(checkBeginDate) || sourceValue.toLocalDate().isEqual(checkBeginDate))
-    && (sourceValue.toLocalDate().isBefore(checkEndDate) || sourceValue.toLocalDate().isEqual(checkEndDate))) {
+    if ((sourceValue.toLocalDate().isAfter(checkBeginDate)
+            || sourceValue.toLocalDate().isEqual(checkBeginDate))
+        && (sourceValue.toLocalDate().isBefore(checkEndDate)
+            || sourceValue.toLocalDate().isEqual(checkEndDate))) {
       for (String day : getTimeInCycle()) {
         if (Integer.valueOf(day) == sourceValue.getDayOfWeek().getValue()) {
           todayRun = true;
@@ -214,8 +206,7 @@ public class CycleStrategy implements IBotStrategy {
     boolean todayRun = false;
     LocalDate checkDate = getCycleBeginTime().toLocalDate();
     // 当月是否执行
-    while (Long.parseLong(
-            checkDate.getYear() + String.format("%02d", checkDate.getMonthValue()))
+    while (Long.parseLong(checkDate.getYear() + String.format("%02d", checkDate.getMonthValue()))
         < Long.parseLong(
             sourceValue.getYear() + String.format("%02d", sourceValue.getMonthValue()))) {
       checkDate = checkDate.plusMonths(getCycleInteval());
@@ -227,7 +218,7 @@ public class CycleStrategy implements IBotStrategy {
       for (String day : getTimeInCycle()) {
         LocalDate dateOfMonth =
             LocalDate.parse(
-                    now.toLocalDate().getYear()
+                now.toLocalDate().getYear()
                     + "-"
                     + String.format("%02d", now.toLocalDate().getMonthValue())
                     + "-"

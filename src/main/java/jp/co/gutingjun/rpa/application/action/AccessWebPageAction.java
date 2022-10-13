@@ -1,6 +1,7 @@
 package jp.co.gutingjun.rpa.application.action;
 
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import jp.co.gutingjun.rpa.common.RPAConst;
 import jp.co.gutingjun.rpa.model.action.web.WebClientActionModel;
 import org.springframework.stereotype.Component;
 
@@ -18,8 +19,8 @@ public class AccessWebPageAction extends WebClientActionModel {
   protected Object doAction(Object inputData) {
     String result = null;
     try {
-      HtmlPage page = getWebClient().getPage((String) getWebContext().get(URL));
-      getContext().put(WEBCLIENT, getWebClient());
+      HtmlPage page = getWebClient().getPage((String) getContext().get(RPAConst.URL));
+      getContext().put(RPAConst.WEBCLIENT, getWebClient());
       setOutputData(page);
     } catch (Exception ex) {
       throw new RuntimeException(ex);
@@ -30,8 +31,8 @@ public class AccessWebPageAction extends WebClientActionModel {
   @Override
   protected Object afterDoAction(Object outputData) {
     Map<String, Object> outputDataMap = new HashMap<>();
-    outputDataMap.putAll(getWebContext());
-    outputDataMap.put(OUTPUTDATA, outputData);
+    outputDataMap.putAll(getContext());
+    outputDataMap.put(RPAConst.OUTPUTDATA, outputData);
     return outputDataMap;
   }
 

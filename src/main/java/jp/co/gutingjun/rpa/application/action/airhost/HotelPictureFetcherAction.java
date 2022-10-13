@@ -1,13 +1,18 @@
 package jp.co.gutingjun.rpa.application.action.airhost;
 
-public class HotelPictureFetcherAction extends DataRESTFetcherActionModel{
-    public HotelPictureFetcherAction(){
-        getWebContext().put(URL, "https://cloud.airhost.co/en/houses/"+ TAG_HOUSEID + "/photos.json");
-        appendDependActionClasses(UserPasswordLoginAction.class);
-    }
+import jp.co.gutingjun.rpa.common.RPAConst;
 
-    @Override
-    protected Object doAction(Object inputData) {
-        return fetchData();
-    }
+public class HotelPictureFetcherAction extends DataRESTFetcherActionModel {
+  public HotelPictureFetcherAction() {
+    getContext()
+        .put(
+            RPAConst.URL,
+            "https://cloud.airhost.co/en/houses/" + RPAConst.TAG_HOUSEID + "/photos.json");
+    appendDependActionClasses(UserPasswordLoginAction.class);
+  }
+
+  @Override
+  protected Object doAction(Object inputData) {
+    return fetchData();
+  }
 }

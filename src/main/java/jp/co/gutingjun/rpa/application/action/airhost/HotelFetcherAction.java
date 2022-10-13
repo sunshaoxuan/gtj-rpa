@@ -1,26 +1,24 @@
 package jp.co.gutingjun.rpa.application.action.airhost;
 
+import jp.co.gutingjun.rpa.common.RPAConst;
 import org.springframework.stereotype.Component;
 
 /** AirHost动作：读取所有房源数据 */
 @Component
 public class HotelFetcherAction extends PagedDataFetcherActionModel {
-  /** 房源列表标签 */
-  final String TAG_DATA = "houses";
-
   public HotelFetcherAction() {
-    getWebContext()
+    getContext()
         .put(
-            URL,
+            RPAConst.URL,
             "https://cloud.airhost.co/ja/houses.json?"
                 + "draw="
-                + TAG_REQUESTTIMES
+                + RPAConst.TAG_REQUESTTIMES
                 + "&start="
-                + TAG_STARTINDEX
+                + RPAConst.TAG_STARTINDEX
                 + "&length="
-                + TAG_LENGTH);
+                + RPAConst.TAG_LENGTH);
 
-    getWebContext().put(TAG_PAGESIZE, 5);
+    getContext().put(RPAConst.TAG_PAGESIZE, 5);
     setAccessSleepEnabled(true);
     setMaxSleepSeconds(5);
     appendDependActionClasses(UserPasswordLoginAction.class);
@@ -28,6 +26,6 @@ public class HotelFetcherAction extends PagedDataFetcherActionModel {
 
   @Override
   protected Object doAction(Object inputData) {
-    return fetchDataList(TAG_DATA);
+    return fetchDataList(RPAConst.TAG_HOUSEDATA);
   }
 }

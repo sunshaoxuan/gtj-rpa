@@ -1,23 +1,30 @@
 package jp.co.gutingjun.rpa.application.action.gtj;
 
-import jp.co.gutingjun.rpa.model.action.web.WebDriverActionModel;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
+import com.gargoylesoftware.htmlunit.HttpMethod;
+import com.gargoylesoftware.htmlunit.UnexpectedPage;
+import com.gargoylesoftware.htmlunit.WebRequest;
+import com.gargoylesoftware.htmlunit.WebResponse;
+import com.gargoylesoftware.htmlunit.util.NameValuePair;
+import jp.co.gutingjun.common.util.JsonUtils;
+import jp.co.gutingjun.rpa.common.RPAConst;
+import jp.co.gutingjun.rpa.model.action.web.WebClientActionModel;
 import org.springframework.stereotype.Component;
 
-@Component
-public class UserPassCodeLoginAction extends WebDriverActionModel {
-  /** 登录后加载页面 */
-  public static String LOADPAGE_AFTERLOGIN = "LoadPageAfterLogin";
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
+@Component
+public class UserPassCodeLoginAction extends WebClientActionModel {
   /** 用户Email */
   private String userEmail;
   /** 默认登录验证码 */
   private String defaultPasscode;
 
   public UserPassCodeLoginAction() {
-    getWebContext().put(URL, "https://test.admin.gutingjun.com/login");
-    getWebContext().put(LOADPAGE_AFTERLOGIN, "https://test.admin.gutingjun.com/index");
+    getContext().put(RPAConst.URL, "https://travel-sit.gutingjun.com/api/uaa/oauth/token");
+    setAccessToken("d2ViQXBwOndlYkFwcA==");
   }
 
   public String getUserEmail() {
@@ -39,44 +46,36 @@ public class UserPassCodeLoginAction extends WebDriverActionModel {
   @Override
   protected Object doAction(Object inputData) {
     try {
-      setMoveOutOfScreen(true);
-      getWebDriver().get((String) getWebContext().get(URL));
-      WebElement form = getWebDriver().findElement(By.tagName("form"));
-      form.findElements(By.tagName("input"))
-          .forEach(
-              element -> {
-                if (element != null) {
-                  if (element.getAttribute("type").equals("email")) {
-                    element.sendKeys(getUserEmail());
-                  } else if (element.getAttribute("type").equals("number")) {
-                    element.sendKeys(getDefaultPasscode());
-                  }
-                }
-              });
-
-      form.findElements(By.tagName("button")).stream()
-          .filter(
-              element ->
-                  element.getAttribute("class").contains("button-login")
-                      || element.getAttribute("class").contains("button--primary"))
-          .findFirst()
-          .get()
-          .click();
-      Thread.sleep(3000L);
-      getWebDriver().get((String) getWebContext().get(LOADPAGE_AFTERLOGIN));
-
-      if (getWebDriver().findElementsByTagName("li").stream()
-              .filter(li -> li.getAttribute("class").contains("submenu"))
-              .count()
-          > 0) {
-        setOutputData(Boolean.TRUE);
-      } else {
-        setOutputData(Boolean.FALSE);
+      WebRequest request =
+          new WebRequest(
+              new java.net.URL((String) getContext().get(RPAConst.URL)), HttpMethod.POST);
+      List<NameValuePair> data = new ArrayList<>();
+      data.add(new NameValuePair("username", getUserEmail()));
+      data.add(new NameValuePair("password", getDefaultPasscode()));
+      data.add(new NameValuePair("grant_type", "password"));
+      data.add(new NameValuePair("scope", "app"));
+      data.add(new NameValuePair("auth_type", "email"));
+      data.add(new NameValuePair("device", "kanran"));
+      request.setRequestParameters(data);
+      request.setAdditionalHeader("Authorization", "Basic " + getAccessToken());
+      UnexpectedPage page = getWebClient().getPage(request);
+      getWebClient().waitForBackgroundJavaScript(10000);
+      WebResponse response = page.getWebResponse();
+      if (response.getContentType().equals("application/json")) {
+        response = page.getWebResponse();
+        String json = response.getContentAsString();
+        Map result = JsonUtils.json2Map(json);
+        if (result.containsKey(RPAConst.TAG_COOKIE_ACCESSTOKEN)) {
+          getContext().put(RPAConst.ACCESSTOKEN, result.get(RPAConst.TAG_COOKIE_ACCESSTOKEN));
+          return true;
+        } else {
+          return false;
+        }
       }
-      getWebContext().put(WEBDRIVER, getWebDriver());
-      return getOutputData();
-    } catch (Exception ex) {
-      throw new RuntimeException(ex.getMessage());
+    } catch (IOException e) {
+      throw new RuntimeException(e.getMessage());
     }
+
+    return null;
   }
 }

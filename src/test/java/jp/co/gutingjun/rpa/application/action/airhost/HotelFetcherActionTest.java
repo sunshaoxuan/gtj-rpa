@@ -1,5 +1,6 @@
 package jp.co.gutingjun.rpa.application.action.airhost;
 
+import jp.co.gutingjun.rpa.common.RPAConst;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
@@ -10,18 +11,14 @@ class HotelFetcherActionTest {
   @Test
   void doAction() {
     UserPasswordLoginAction action = new UserPasswordLoginAction();
-    action
-        .getWebContext()
-        .put(UserPasswordLoginAction.URL, "https://cloud.airhost.co/accounts/sign_in");
-    action.getWebContext().put(UserPasswordLoginAction.USERNAME, "sun.shaoxuan@51fanxing.co.jp");
-    action.getWebContext().put(UserPasswordLoginAction.PASSWORD, "1qaz@WSX");
-    action
-        .getWebContext()
-        .put(UserPasswordLoginAction.LOADPAGE_AFTERLOGIN, "https://cloud.airhost.co/en/dashboard");
+    action.getContext().put(RPAConst.URL, "https://cloud.airhost.co/accounts/sign_in");
+    action.getContext().put(RPAConst.USERNAME, "sun.shaoxuan@51fanxing.co.jp");
+    action.getContext().put(RPAConst.PASSWORD, "1qaz@WSX");
+    action.getContext().put(RPAConst.LOADPAGE_AFTERLOGIN, "https://cloud.airhost.co/en/dashboard");
     action.execute();
 
     HotelFetcherAction airHostAction = new HotelFetcherAction();
-    airHostAction.setContext(action.getContext());
+    airHostAction.getContext().put(RPAConst.WEBCLIENT, action.getContext().get(RPAConst.WEBCLIENT));
     Object outputData = airHostAction.execute();
     Assert.assertEquals(true, outputData != null && outputData instanceof Map);
   }

@@ -247,6 +247,14 @@ public abstract class BotModel extends EventManager implements IBot {
                               newJobNode.setTag((String) job.get("id"));
                               AbsoluteActionFetcher actionFetcher = getActionFetcher();
                               IAction newAction = actionFetcher.getAction((String) job.get("type"));
+                              Map<String, Object> contextMap =
+                                  (Map<String, Object>) job.get("context");
+                              if (contextMap != null && contextMap.size() > 0) {
+                                contextMap.forEach(
+                                    (key, value) -> {
+                                      newJobNode.getContext().put(key.toUpperCase(), value);
+                                    });
+                              }
                               CommonUtils.mapPutAll(
                                   newAction.getContext(), newJobNode.getContext());
                               newJobNode.appendAction(newAction);
@@ -309,7 +317,6 @@ public abstract class BotModel extends EventManager implements IBot {
     // 机器人开始执行
     JobNodeModel currentJobNode = getJobNode();
     if (currentJobNode != null) {
-
       // 派发节点开始事件
       dispatchEvent(new BaseEvent(EventTypeEnum.RUN, currentJobNode, true));
       currentJobNode.execute();

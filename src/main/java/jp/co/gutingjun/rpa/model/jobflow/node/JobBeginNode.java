@@ -15,6 +15,6 @@ public class JobBeginNode extends JobNodeModel {
 
   @Override
   public void execute() {
-    // 开始节点什么也不做
+    super.execute();
   }
 }

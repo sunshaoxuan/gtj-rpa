@@ -2,6 +2,7 @@ package jp.co.gutingjun.rpa.application.action.airhost;
 
 import com.gargoylesoftware.htmlunit.TextPage;
 import com.gargoylesoftware.htmlunit.WebResponse;
+import jp.co.gutingjun.rpa.common.RPAConst;
 import jp.co.gutingjun.rpa.model.action.web.WebClientActionModel;
 import org.apache.log4j.lf5.util.StreamUtils;
 
@@ -14,34 +15,23 @@ import java.util.List;
 import java.util.Map;
 
 public class OrderDetailFileFetcherAction extends WebClientActionModel {
-  /** 请求次数标签 */
-  protected final String TAG_REQUESTTIMES = "$REQUESTTIMES$";
-  /** 查询起始记录数 */
-  protected final String TAG_STARTINDEX = "$STARTINDEX$";
-  /** 最大记录集长度标签 */
-  protected final String TAG_LENGTH = "$LENGTH$";
-  /** 开始日期 */
-  protected final String TAG_BEGINDATE = "$BEGINDATE$";
-  /** 结束日期 */
-  protected final String TAG_ENDDATE = "$ENDDATE$";
-
   private LocalDate beginDate;
   private LocalDate endDate;
 
   public OrderDetailFileFetcherAction() {
-    getWebContext()
+    getContext()
         .put(
-            URL,
+            RPAConst.URL,
             "https://cloud.airhost.co/en/bookings.csv?draw="
-                + TAG_REQUESTTIMES
+                + RPAConst.TAG_REQUESTTIMES
                 + "&order%5B0%5D%5Bdir%5D=asc&start="
-                + TAG_STARTINDEX
+                + RPAConst.TAG_STARTINDEX
                 + "&length="
-                + TAG_LENGTH
+                + RPAConst.TAG_LENGTH
                 + "&search%5Bregex%5D=false&filter%5Bdate_type%5D=checkin_date&filter%5Bbooking_dates_range%5D="
-                + TAG_BEGINDATE
+                + RPAConst.TAG_BEGINDATE
                 + "+-+"
-                + TAG_ENDDATE);
+                + RPAConst.TAG_ENDDATE);
   }
 
   public LocalDate getBeginDate() {
@@ -67,20 +57,20 @@ public class OrderDetailFileFetcherAction extends WebClientActionModel {
     List<Map<String, Object>> dataList = new ArrayList<>();
 
     try {
-      String url = (String) getWebContext().get(URL);
+      String url = (String) getContext().get(RPAConst.URL);
 
       // 先取一条数据，为了取全部房源合计数字
       TextPage page =
           getWebClient()
               .getPage(
-                  url.replace(TAG_REQUESTTIMES, "1")
-                      .replace(TAG_STARTINDEX, "0")
-                      .replace(TAG_LENGTH, "1")
+                  url.replace(RPAConst.TAG_REQUESTTIMES, "1")
+                      .replace(RPAConst.TAG_STARTINDEX, "0")
+                      .replace(RPAConst.TAG_LENGTH, "1")
                       .replace(
-                          TAG_BEGINDATE,
+                          RPAConst.TAG_BEGINDATE,
                           getBeginDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
                       .replace(
-                          TAG_ENDDATE,
+                          RPAConst.TAG_ENDDATE,
                           getEndDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))));
       getWebClient().waitForBackgroundJavaScript(30000);
       WebResponse response = page.getWebResponse();

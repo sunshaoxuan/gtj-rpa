@@ -3,6 +3,7 @@ package jp.co.gutingjun.rpa.application;
 import jp.co.gutingjun.common.util.JsonUtils;
 import jp.co.gutingjun.rpa.application.bot.SimpleBot;
 import jp.co.gutingjun.rpa.config.BotConfig;
+import jp.co.gutingjun.rpa.config.RabbitConfig;
 import jp.co.gutingjun.rpa.model.bot.BotInstance;
 import jp.co.gutingjun.rpa.model.bot.BotModel;
 import jp.co.gutingjun.rpa.model.event.BaseEvent;
@@ -10,14 +11,18 @@ import jp.co.gutingjun.rpa.model.event.EventTypeEnum;
 import jp.co.gutingjun.rpa.model.event.IEventHandler;
 import jp.co.gutingjun.rpa.model.jobflow.node.JobNodeModel;
 import jp.co.gutingjun.rpa.model.strategy.CycleStrategy;
+import org.springframework.amqp.core.AmqpTemplate;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Queue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -28,29 +33,63 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @author ssx
  * @since 2022/08/20
  */
+@EnableScheduling
+@Component
 public class BotBus implements Serializable {
+  private static BotBus localBus;
+  private static AmqpTemplate localAmqpTemplate;
+
   /** 机器人候选者集合 */
-  private static final HashSet<BotModel> candidateSet = new HashSet<>();
+  private final HashSet<BotModel> candidateSet = new HashSet<>();
 
   /** 周期执行机器人合格候选者 */
-  private static final HashSet<BotModel> cycleQualifiedCandidates = new HashSet<>();
-
-  /** 机器人实例缓存 */
-  private static final Queue<BotInstance> botInstanceCache = new LinkedList<>();
+  private final HashSet<BotModel> cycleQualifiedCandidates = new HashSet<>();
 
   /** 执行中机器人集合 */
-  private static final HashSet<BotInstance> executingBot = new HashSet<>();
+  private final HashSet<BotInstance> executingBot = new HashSet<>();
 
   /** 机器人运行线程池 */
-  private static final ExecutorService executeService =
+  private final ExecutorService executeService =
       Executors.newFixedThreadPool(BotConfig.getExecutionPoolSize());
+
+  @Autowired BotBus botBus;
+
+  @Autowired AmqpTemplate amqpTemplate;
+
+  public BotBus() {
+    checkInit();
+  }
+
+  public static BotBus getInstance() {
+    return localBus;
+  }
+
+  protected static AmqpTemplate getLocalAmqpTemplate() {
+    return localAmqpTemplate;
+  }
+
+  @PostConstruct
+  private void checkInit() {
+    if (localBus == null && botBus != null) {
+      localBus = botBus;
+    }
+
+    if (localAmqpTemplate == null && amqpTemplate != null) {
+      localAmqpTemplate = amqpTemplate;
+    }
+  }
+
+  /** 停止机器人执行线程服务 */
+  public void shutDown() {
+    getInstance().getExecuteService().shutdown();
+  }
 
   /**
    * 获取机器人候选者集合
    *
    * @return
    */
-  public static HashSet<BotModel> getCandidateSet() {
+  public HashSet<BotModel> getCandidateSet() {
     return candidateSet;
   }
 
@@ -59,7 +98,7 @@ public class BotBus implements Serializable {
    *
    * @return
    */
-  public static HashSet<BotModel> getCycleQualifiedCandidates() {
+  public HashSet<BotModel> getCycleQualifiedCandidates() {
     return cycleQualifiedCandidates;
   }
 
@@ -68,7 +107,7 @@ public class BotBus implements Serializable {
    *
    * @return
    */
-  public static HashSet<BotInstance> getExecutingBot() {
+  public HashSet<BotInstance> getExecutingBot() {
     return executingBot;
   }
 
@@ -79,19 +118,20 @@ public class BotBus implements Serializable {
    * @return
    * @throws Exception
    */
-  public static BotModel botRegister(String botContext) throws Exception {
+  public BotModel botRegister(String botContext) throws Exception {
     BotModel newBot = new SimpleBot(JsonUtils.json2Map(botContext));
     AtomicBoolean added = new AtomicBoolean(false);
-    if (getCandidateSet().size() == 0) {
-      getCandidateSet().add(newBot);
+    if (getInstance().getCandidateSet().size() == 0) {
+      getInstance().getCandidateSet().add(newBot);
       added.set(true);
     } else {
-      getCandidateSet()
+      getInstance()
+          .getCandidateSet()
           .forEach(
               candidate -> {
                 if (candidate.getClass().equals(newBot.getClass())) {
                   if (!candidate.isSingleton()) {
-                    getCandidateSet().add(newBot);
+                    getInstance().getCandidateSet().add(newBot);
                     added.set(true);
                   }
                 }
@@ -100,58 +140,11 @@ public class BotBus implements Serializable {
     return added.get() ? newBot : null;
   }
 
-  /**
-   * 获取机器人实例缓存
-   *
-   * @return
-   */
-  public static Queue<BotInstance> getBotInstanceCache() {
-    return botInstanceCache;
-  }
-
-  /** 扫描候选机器人清单，触发周期执行机器人 */
-  @Scheduled(cron = "0/1 * * * * ?")
-  public static void scanCandidates() {
-    if (getCandidateSet().size() > 0) {
-      LocalDateTime now = LocalDateTime.now();
-      getCandidateSet().stream()
-          .filter(botModel -> !getCycleQualifiedCandidates().contains(botModel))
-          .forEach(
-              botModel -> {
-                if (Arrays.stream(botModel.getBotStrategy())
-                    .filter(strategy -> strategy instanceof CycleStrategy)
-                    .findFirst()
-                    .get()
-                    .validate(now, now)) {
-                  getCycleQualifiedCandidates().add(botModel);
-                }
-              });
-    }
-
-    if (getCycleQualifiedCandidates().size() > 0) {
-      getCycleQualifiedCandidates().stream()
-          .forEach(
-              botModel -> {
-                AtomicBoolean qualified = new AtomicBoolean(false);
-                Arrays.stream(botModel.getBotStrategy())
-                    .filter(strategy -> !(strategy instanceof CycleStrategy))
-                    .forEach(
-                        strategy -> {
-                          qualified.set(qualified.get() & strategy.validate(null, null));
-                        });
-                if (qualified.get()) {
-                  InstantiateBot(botModel);
-                }
-              });
-    }
-  }
-
-  /**
-   * 实例化机器人，将实例推入执行缓冲
-   *
-   * @param botModel
-   */
-  private static void InstantiateBot(BotModel botModel) {
+  /** 扫描机器人执行缓冲，将缓存中的机器人推入执行线程 */
+  @RabbitListener(queues = RabbitConfig.RPA_RUNNING_CACHE_QUEUE)
+  public void runBot(Long id) {
+    BotModel botModel =
+        getCandidateSet().stream().filter(bot -> bot.getId().equals(id)).findFirst().get();
     BotInstance newBot = new BotInstance();
     newBot.buildBot(botModel);
     // 监听机器人执行结束事件，叶子节点执行结束后视为机器人任务结束
@@ -162,22 +155,15 @@ public class BotBus implements Serializable {
               if (event.getSoureObject() instanceof JobNodeModel) {
                 if (((JobNodeModel) event.getSoureObject()).isLeaf()) {
                   // 机器节点结束在叶子结点，该机器人执行结束
-                  getExecutingBot().remove(event.getSoureObject());
+                  getInstance().getExecutingBot().remove(event.getSoureObject());
                 }
               }
             });
-  }
 
-  /** 扫描机器人执行缓冲，将缓存中的机器人推入执行线程 */
-  @Scheduled(cron = "0/1 * * * * ?")
-  public static void runBot() {
-    while (getBotInstanceCache().size() > 0) {
-      BotInstance bot = getBotInstanceCache().poll();
-      if (!getExecutingBot().contains(bot)) {
-        // 避免重复执行
-        getExecuteService().execute(bot);
-        getExecutingBot().add(bot);
-      }
+    if (!getInstance().getExecutingBot().contains(newBot) && newBot.isSingleton()) {
+      // 避免重复执行
+      getInstance().getExecuteService().execute(newBot);
+      getInstance().getExecutingBot().add(newBot);
     }
   }
 
@@ -186,13 +172,8 @@ public class BotBus implements Serializable {
    *
    * @return
    */
-  public static ExecutorService getExecuteService() {
+  public ExecutorService getExecuteService() {
     return executeService;
-  }
-
-  /** 停止机器人执行线程服务 */
-  public static void shutDown() {
-    getExecuteService().shutdown();
   }
 
   /**
@@ -200,11 +181,67 @@ public class BotBus implements Serializable {
    *
    * @param botId 机器人ID
    */
-  public static void manualExecuteBot(Long botId) {
+  public void manualExecuteBot(Long botId) {
     BotModel foundBot =
-        getCandidateSet().stream().filter(botModel -> botModel.getId() == botId).findFirst().get();
+        getInstance().getCandidateSet().stream()
+            .filter(botModel -> botModel.getId().equals(botId))
+            .findFirst()
+            .get();
     if (foundBot != null) {
-      InstantiateBot(foundBot);
+      getInstance().pushBotToMQ(foundBot);
     }
+  }
+
+  /** 扫描候选机器人清单，触发周期执行机器人 */
+  @Scheduled(cron = "0/5 * * * * ?")
+  public void scanCandidates() {
+    if (getInstance().getCandidateSet().size() > 0) {
+      LocalDateTime now = LocalDateTime.now();
+      getInstance().getCandidateSet().stream()
+          .filter(botModel -> !getInstance().getCycleQualifiedCandidates().contains(botModel))
+          .forEach(
+              botModel -> {
+                if (Arrays.stream(botModel.getBotStrategy())
+                    .filter(strategy -> strategy instanceof CycleStrategy)
+                    .findFirst()
+                    .get()
+                    .validate(now, now)) {
+                  if (!(botModel.isSingleton()
+                      && getInstance().getExecutingBot().stream()
+                              .filter(runningBot -> runningBot.getId().equals(botModel.getId()))
+                              .count()
+                          > 0)) {
+                    getInstance().getCycleQualifiedCandidates().add(botModel);
+                  }
+                }
+              });
+    }
+
+    if (getInstance().getCycleQualifiedCandidates().size() > 0) {
+      getInstance().getCycleQualifiedCandidates().stream()
+          .forEach(
+              botModel -> {
+                AtomicBoolean qualified = new AtomicBoolean(false);
+                Arrays.stream(botModel.getBotStrategy())
+                    .filter(strategy -> !(strategy instanceof CycleStrategy))
+                    .forEach(
+                        strategy -> {
+                          qualified.set(qualified.get() & strategy.validate(null, null));
+                        });
+                if (qualified.get()) {
+                  getInstance().pushBotToMQ(botModel);
+                }
+              });
+    }
+  }
+
+  /**
+   * 实例化机器人，将实例推入执行缓冲
+   *
+   * @param botModel
+   */
+  private void pushBotToMQ(BotModel botModel) {
+    // 推入执行等待缓冲
+    getLocalAmqpTemplate().convertAndSend(RabbitConfig.RPA_RUNNING_CACHE_QUEUE, botModel.getId());
   }
 }
