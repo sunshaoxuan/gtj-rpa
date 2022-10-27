@@ -1,22 +1,27 @@
 package jp.co.gutingjun.rpa.model.jobflow.condition;
 
 import jp.co.gutingjun.rpa.common.Calculator;
-import jp.co.gutingjun.rpa.model.jobflow.condition.function.BaseFunction;
+import jp.co.gutingjun.rpa.inf.IContainer;
 import jp.co.gutingjun.rpa.model.jobflow.condition.function.FunctionFactory;
+import jp.co.gutingjun.rpa.model.jobflow.condition.function.FunctionModel;
+import jp.co.gutingjun.rpa.model.jobflow.node.LinkNodeModel;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Stack;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public abstract class LogicalCondition implements ICondition {
+public abstract class LogicalConditionModel implements ICondition, IContainer<LinkNodeModel> {
   static Stack<String[]> functionStack = new Stack();
   private static Map<String, String> functionDefine = null;
   private Object leftObject;
   private Object rightObject;
   private Object[] objects;
+
+  private LinkNodeModel parentContainer;
 
   private Map<String, Object> context;
 
@@ -25,31 +30,41 @@ public abstract class LogicalCondition implements ICondition {
       functionDefine = new HashMap<>();
       // ISNULL(A,B)
       functionDefine.put(
-          BaseFunction.FunctionNameEnum.ISNULL.getFunctionName(),
-          BaseFunction.FunctionNameEnum.ISNULL.getFunctionPattern());
+          FunctionModel.FunctionNameEnum.ISNULL.getFunctionName(),
+          FunctionModel.FunctionNameEnum.ISNULL.getFunctionPattern());
 
       // GETDATE(TABLE,FIELD,WHERE)
       functionDefine.put(
-          BaseFunction.FunctionNameEnum.GETDATA.getFunctionName(),
-          BaseFunction.FunctionNameEnum.GETDATA.getFunctionPattern());
+          FunctionModel.FunctionNameEnum.GETDATA.getFunctionName(),
+          FunctionModel.FunctionNameEnum.GETDATA.getFunctionPattern());
 
       // Object.Method().Method()...
       functionDefine.put(
-          BaseFunction.FunctionNameEnum.INPUTDATA.getFunctionName(),
-          BaseFunction.FunctionNameEnum.INPUTDATA.getFunctionPattern());
+          FunctionModel.FunctionNameEnum.INPUTDATA.getFunctionName(),
+          FunctionModel.FunctionNameEnum.INPUTDATA.getFunctionPattern());
 
       // OUTPUTDATA
       functionDefine.put(
-          BaseFunction.FunctionNameEnum.OUTPUTDATA.getFunctionName(),
-          BaseFunction.FunctionNameEnum.OUTPUTDATA.getFunctionPattern());
+          FunctionModel.FunctionNameEnum.OUTPUTDATA.getFunctionName(),
+          FunctionModel.FunctionNameEnum.OUTPUTDATA.getFunctionPattern());
+
+      // GETLASTOUTPUTDATA
+      functionDefine.put(
+          FunctionModel.FunctionNameEnum.GETLASTOUTPUTDATA.getFunctionName(),
+          FunctionModel.FunctionNameEnum.GETLASTOUTPUTDATA.getFunctionPattern());
+
+      // GETLASTEXECUTERESULT
+      functionDefine.put(
+          FunctionModel.FunctionNameEnum.GETLASTEXECUTERESULT.getFunctionName(),
+          FunctionModel.FunctionNameEnum.GETLASTEXECUTERESULT.getFunctionPattern());
     }
 
     return functionDefine;
   }
 
-  public static LogicalCondition getCondition(
+  public static LogicalConditionModel getCondition(
       String formulaName, Object formulaObj, Object inputData) {
-    LogicalCondition condition = ConditionFactory.createCondition(formulaName);
+    LogicalConditionModel condition = ConditionFactory.createCondition(formulaName);
     if (condition != null) {
       Object leftObj = ((Map<String, Object>) formulaObj).get("left");
       Object rightObj = ((Map<String, Object>) formulaObj).get("right");
@@ -66,7 +81,7 @@ public abstract class LogicalCondition implements ICondition {
    * @param formula 表达式
    * @return
    */
-  public static boolean getLogicalValue(Object formula) {
+  public boolean getLogicalValue(Object formula) {
     boolean rtn;
     if (formula instanceof ICondition) {
       rtn = ((ICondition) formula).getValue();
@@ -82,7 +97,7 @@ public abstract class LogicalCondition implements ICondition {
    * @param formula 表达式
    * @return
    */
-  public static String getStringValue(Object formula) throws Exception {
+  public String getStringValue(Object formula) throws Exception {
     String rtn = "";
     if (formula instanceof String) {
       rtn = parseStringValue((String) formula);
@@ -90,7 +105,7 @@ public abstract class LogicalCondition implements ICondition {
     return rtn;
   }
 
-  private static String parseStringValue(String formula) throws Exception {
+  private String parseStringValue(String formula) throws Exception {
     if (containsFunction(formula)) {
       return evalFunctions(formula);
     } else {
@@ -98,19 +113,19 @@ public abstract class LogicalCondition implements ICondition {
     }
   }
 
-  private static String evalFunctions(String formula) {
+  private String evalFunctions(String formula) {
     int minPos = Integer.MAX_VALUE;
     String minFun = "";
-    do {
-      for (String function : getFunctionDefine().keySet()) {
-        if (formula.contains(function)) {
-          if (formula.indexOf(function) < minPos) {
-            minPos = formula.indexOf(function);
-            minFun = function;
-          }
+
+    for (String function : getFunctionDefine().keySet()) {
+      if (formula.contains(function)) {
+        if (formula.indexOf(function) < minPos) {
+          minPos = formula.indexOf(function);
+          minFun = function;
+          break;
         }
       }
-    } while (containsFunction(formula));
+    }
 
     if (minPos != Integer.MAX_VALUE && !minFun.equals("")) {
       // 有函数需要解析
@@ -118,7 +133,7 @@ public abstract class LogicalCondition implements ICondition {
       Matcher matcher = pattern.matcher(formula);
       Map<String, String> funcValueMap = new HashMap<>();
       if (matcher.find()) {
-        for (int i = 0; i < matcher.groupCount(); i++) {
+        for (int i = 0; i <= matcher.groupCount(); i++) {
           String function = matcher.group(i);
 
           if (!funcValueMap.containsKey(function)) {
@@ -128,28 +143,32 @@ public abstract class LogicalCondition implements ICondition {
         }
       }
 
-      funcValueMap.forEach((func, value) -> formula.replace(func, value));
+      AtomicReference<String> finalFormula = new AtomicReference<>("");
+      funcValueMap.forEach(
+          (func, value) -> {
+            finalFormula.set(formula.replace(func, value));
+          });
 
-      return String.valueOf(Calculator.calculate(formula));
-    } else {
-      // 无函数需要解析，直接返回表达式计算结果
-      return String.valueOf(Calculator.calculate(formula));
+      return finalFormula.get();
     }
+
+    return formula;
   }
 
-  private static String evalFunction(String function) {
-    BaseFunction bf = FunctionFactory.CreateFunction(function);
+  private String evalFunction(String function) {
+    FunctionModel bf = FunctionFactory.CreateFunction(function);
+    bf.setParentContainer(this);
     String[] refs = bf.getRefs();
     for (String ref : refs) {
       function.replace(ref, evalFunctions(ref));
     }
     bf.setFunctionStr(function);
     bf.eval();
-    return String.valueOf(bf.getOutputData());
+    return String.valueOf(bf.getResult());
   }
 
-  private static boolean containsFunction(String formula) {
-    for (String function : functionDefine.keySet()) {
+  private boolean containsFunction(String formula) {
+    for (String function : getFunctionDefine().keySet()) {
       if (formula.contains(function)) {
         return true;
       }
@@ -158,10 +177,15 @@ public abstract class LogicalCondition implements ICondition {
     return false;
   }
 
-  private static boolean evalLogicalValue(String formula) {
+  private boolean evalLogicalValue(String formula) {
     if (containsFunction(formula)) {
+      // 预定义函数
       return evalLogicalValue(evalFunctions(formula));
+    } else if (formula.equalsIgnoreCase("true") || formula.equalsIgnoreCase("false")) {
+      // 逻辑值
+      return Boolean.valueOf(formula);
     } else {
+      // 数学表达式
       return Calculator.calculate(formula) != 0;
     }
   }
@@ -220,5 +244,24 @@ public abstract class LogicalCondition implements ICondition {
 
   public void setObjects(Object[] objects) {
     this.objects = objects;
+  }
+
+  @Override
+  public LinkNodeModel getParentContainer() {
+    return parentContainer;
+  }
+
+  public void setParentContainer(LinkNodeModel parentContainer) {
+    this.parentContainer = parentContainer;
+  }
+
+  @Override
+  public IContainer getContainer() {
+    return this;
+  }
+
+  @Override
+  public IContainer getTopContainer() {
+    return getParentContainer() != null ? getParentContainer().getTopContainer() : null;
   }
 }

@@ -19,10 +19,11 @@ public class RoomTypeDetailFetcherAction extends DataRESTFetcherActionModel {
   }
 
   @Override
-  protected Object doAction(Object inputData) {
+  protected Object doAction() {
     Map<String, Object> result = new HashMap<>();
     Map dataMap = fetchData();
     result.put(String.valueOf(getRoomTypeId()), dataMap);
-    return dataMap;
+    setOutputData(result);
+    return result != null && result.size() > 0;
   }
 }

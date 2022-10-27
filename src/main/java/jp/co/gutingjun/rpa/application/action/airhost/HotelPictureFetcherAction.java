@@ -2,6 +2,8 @@ package jp.co.gutingjun.rpa.application.action.airhost;
 
 import jp.co.gutingjun.rpa.common.RPAConst;
 
+import java.util.Map;
+
 public class HotelPictureFetcherAction extends DataRESTFetcherActionModel {
   public HotelPictureFetcherAction() {
     getContext()
@@ -12,7 +14,9 @@ public class HotelPictureFetcherAction extends DataRESTFetcherActionModel {
   }
 
   @Override
-  protected Object doAction(Object inputData) {
-    return fetchData();
+  protected Object doAction() {
+    Map<String, Object> result = fetchData();
+    setOutputData(result);
+    return result != null && result.size() > 0;
   }
 }

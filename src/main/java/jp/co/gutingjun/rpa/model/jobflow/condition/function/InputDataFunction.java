@@ -1,10 +1,10 @@
 package jp.co.gutingjun.rpa.model.jobflow.condition.function;
 
-import jp.co.gutingjun.rpa.model.action.base.IAction;
+import jp.co.gutingjun.rpa.model.action.IAction;
 
-public class InputDataFunction extends BaseFunction {
+public class InputDataFunction extends FunctionModel {
   @Override
-  public String getFuncionName() {
+  public String getFunctionName() {
     return FunctionNameEnum.INPUTDATA.getFunctionName();
   }
 
@@ -15,6 +15,6 @@ public class InputDataFunction extends BaseFunction {
 
   @Override
   public void eval() {
-    if (getInputData() instanceof IAction) setOutputData(((IAction) getInputData()).getInputData());
+    if (getInputData() instanceof IAction) setResult(((IAction) getInputData()).getInputData());
   }
 }

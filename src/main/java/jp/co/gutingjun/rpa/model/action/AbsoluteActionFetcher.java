@@ -1,4 +1,4 @@
-package jp.co.gutingjun.rpa.model.action.base;
+package jp.co.gutingjun.rpa.model.action;
 
 import java.io.Serializable;
 import java.util.List;

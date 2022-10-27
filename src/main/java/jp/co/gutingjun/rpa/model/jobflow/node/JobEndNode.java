@@ -10,7 +10,7 @@ public class JobEndNode extends JobNodeModel {
 
   @Override
   public void execute() {
-    // 结束节点什么也不做
+    super.execute();
   }
 
   @Override

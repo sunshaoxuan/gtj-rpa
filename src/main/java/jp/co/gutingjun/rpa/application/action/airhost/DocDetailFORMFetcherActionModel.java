@@ -3,7 +3,7 @@ package jp.co.gutingjun.rpa.application.action.airhost;
 import com.gargoylesoftware.htmlunit.html.*;
 import jp.co.gutingjun.rpa.common.CommonUtils;
 import jp.co.gutingjun.rpa.common.RPAConst;
-import jp.co.gutingjun.rpa.model.action.web.WebClientActionModel;
+import jp.co.gutingjun.rpa.model.action.WebClientActionModel;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.Arrays;

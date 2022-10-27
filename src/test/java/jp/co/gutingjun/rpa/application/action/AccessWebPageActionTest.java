@@ -15,7 +15,7 @@ class AccessWebPageActionTest {
     Map<String, Object> webContext = new HashMap<>();
     webContext.put(RPAConst.URL, "https://cloud.airhost.co/accounts/sign_in");
     action.setContext(webContext);
-    action.doAction(null);
+    action.doAction();
     Assertions.assertNotEquals(null, action.getOutputData());
   }
 }

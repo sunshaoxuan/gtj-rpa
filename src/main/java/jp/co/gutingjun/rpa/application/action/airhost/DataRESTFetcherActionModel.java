@@ -5,7 +5,7 @@ import com.gargoylesoftware.htmlunit.WebResponse;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import jp.co.gutingjun.common.util.JsonUtils;
 import jp.co.gutingjun.rpa.common.RPAConst;
-import jp.co.gutingjun.rpa.model.action.web.WebClientActionModel;
+import jp.co.gutingjun.rpa.model.action.WebClientActionModel;
 
 import java.util.HashMap;
 import java.util.Map;

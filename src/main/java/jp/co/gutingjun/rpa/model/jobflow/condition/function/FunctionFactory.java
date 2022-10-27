@@ -1,21 +1,29 @@
 package jp.co.gutingjun.rpa.model.jobflow.condition.function;
 
 public class FunctionFactory {
-  public static BaseFunction CreateFunction(String functionStr) {
-    BaseFunction newFunc = null;
-    if (functionStr.startsWith(BaseFunction.FunctionNameEnum.ISNULL.getFunctionName())) {
+  public static FunctionModel CreateFunction(String functionStr) {
+    FunctionModel newFunc = null;
+    if (functionStr.startsWith(FunctionModel.FunctionNameEnum.ISNULL.getFunctionName())) {
       newFunc = new IsNullFunction();
-    } else if (functionStr.startsWith(BaseFunction.FunctionNameEnum.GETDATA.getFunctionName())) {
+    } else if (functionStr.startsWith(FunctionModel.FunctionNameEnum.GETDATA.getFunctionName())) {
       newFunc = new GetDataFunction();
-    } else if (functionStr.startsWith(BaseFunction.FunctionNameEnum.INPUTDATA.getFunctionName())) {
+    } else if (functionStr.startsWith(FunctionModel.FunctionNameEnum.INPUTDATA.getFunctionName())) {
       newFunc = new InputDataFunction();
-    } else if (functionStr.startsWith(BaseFunction.FunctionNameEnum.OUTPUTDATA.getFunctionName())) {
-      newFunc.setFunctionStr(functionStr);
+    } else if (functionStr.startsWith(
+        FunctionModel.FunctionNameEnum.OUTPUTDATA.getFunctionName())) {
+      newFunc = new OutputDataFunction();
+    } else if (functionStr.startsWith(
+        FunctionModel.FunctionNameEnum.GETLASTOUTPUTDATA.getFunctionName())) {
+      newFunc = new GetLastOutputDataFunction();
+    } else if (functionStr.startsWith(
+        FunctionModel.FunctionNameEnum.GETLASTEXECUTERESULT.getFunctionName())) {
+      newFunc = new GetLastExecuteResultFunction();
     }
+
     return newFunc;
   }
 
-  public static BaseFunction CreateFunction(BaseFunction.FunctionNameEnum name) {
+  public static FunctionModel CreateFunction(FunctionModel.FunctionNameEnum name) {
     return CreateFunction(name.getFunctionName());
   }
 }

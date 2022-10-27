@@ -1,8 +1,8 @@
 package jp.co.gutingjun.rpa.model.jobflow.condition.function;
 
-public class IsNullFunction extends BaseFunction {
+public class IsNullFunction extends FunctionModel {
   @Override
-  public String getFuncionName() {
+  public String getFunctionName() {
     return FunctionNameEnum.ISNULL.getFunctionName();
   }
 
@@ -27,6 +27,6 @@ public class IsNullFunction extends BaseFunction {
       rtn = refs[1];
     }
 
-    setOutputData(rtn);
+    setResult(rtn);
   }
 }

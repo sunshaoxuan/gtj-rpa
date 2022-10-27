@@ -14,24 +14,17 @@ public interface IBot extends Serializable {
    *
    * @return
    */
-  public IBotStrategy[] getBotStrategy();
+  IBotStrategy[] getBotStrategy();
 
   /**
    * 获取工作任务链
    *
    * @return
    */
-  public JobNodeModel getJobNode();
+  JobNodeModel getJobNode();
 
   /** 设置工作任务链 */
-  public void setJobNode(JobNodeModel jobNode);
-
-  /**
-   * 设置机器人ID
-   *
-   * @param value
-   */
-  void setId(Long value);
+  void setJobNode(JobNodeModel jobNode);
 
   /**
    * 获取机器人ID
@@ -41,11 +34,11 @@ public interface IBot extends Serializable {
   Long getId();
 
   /**
-   * 设置机器人名称
+   * 设置机器人ID
    *
    * @param value
    */
-  void setName(String value);
+  void setId(Long value);
 
   /**
    * 获取机器人名称
@@ -55,11 +48,11 @@ public interface IBot extends Serializable {
   String getName();
 
   /**
-   * 设置描述
+   * 设置机器人名称
    *
    * @param value
    */
-  void setDescription(String value);
+  void setName(String value);
 
   /**
    * 获取描述
@@ -69,11 +62,11 @@ public interface IBot extends Serializable {
   String getDescription();
 
   /**
-   * 设置创建时间
+   * 设置描述
    *
    * @param value
    */
-  void setCreatedTime(Date value);
+  void setDescription(String value);
 
   /**
    * 获取创建时间
@@ -83,11 +76,11 @@ public interface IBot extends Serializable {
   Date getCreatedTime();
 
   /**
-   * 设置创建人ID
+   * 设置创建时间
    *
    * @param value
    */
-  void setCreatedBy(Long value);
+  void setCreatedTime(Date value);
 
   /**
    * 获取出错时执行动作
@@ -106,8 +99,15 @@ public interface IBot extends Serializable {
    */
   Long getCreatedBy();
 
+  /**
+   * 设置创建人ID
+   *
+   * @param value
+   */
+  void setCreatedBy(Long value);
+
   /** 解析加载 */
-  void load(Map<String, Object> botSettings);
+  void build(Map<String, Object> botSettings);
 
   /** 启动 */
   void start();

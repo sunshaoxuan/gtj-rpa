@@ -1,4 +1,4 @@
-package jp.co.gutingjun.rpa.model.action.web;
+package jp.co.gutingjun.rpa.model.action;
 
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.NicelyResynchronizingAjaxController;
@@ -17,18 +17,38 @@ public abstract class WebClientActionModel extends WebActionModel {
    * @return
    */
   public WebClient getWebClient() {
-    if (webClient == null) {
-      if (getContext().containsKey(RPAConst.WEBCLIENT)
-          && getContext().get(RPAConst.WEBCLIENT) != null) {
-        // 环境变量里有就从环境变更里取
-        webClient = (WebClient) getContext().get(RPAConst.WEBCLIENT);
-      } else {
-        // 环境变更里没有就新建
-        webClient = new WebClient(BrowserVersion.CHROME);
-        setWebClientDefaultValue(webClient);
-      }
+    if (getTopContainer() != null
+        && getTopContainer().getContext() != null
+        && getTopContainer().getContext().containsKey(RPAConst.WEBCLIENT)
+        && getTopContainer().getContext().get(RPAConst.WEBCLIENT) != null) {
+      // 从顶层容器中继承网络连接
+      webClient = (WebClient) getTopContainer().getContext().get(RPAConst.WEBCLIENT);
     }
 
+    if (webClient == null
+        && getParentContainer() != null
+        && getParentContainer().getContext() != null
+        && getParentContainer().getContext().containsKey(RPAConst.WEBCLIENT)
+        && getParentContainer().getContext().get(RPAConst.WEBCLIENT) != null) {
+      // 从上层容器中继承网络连接
+      webClient = (WebClient) getParentContainer().getContext().get(RPAConst.WEBCLIENT);
+    }
+
+    if (webClient == null
+        && getContext() != null
+        && getContext().containsKey(RPAConst.WEBCLIENT)
+        && getContext().get(RPAConst.WEBCLIENT) != null) {
+      // 上层容器没取到，从本层环境变更里取
+      webClient = (WebClient) getContext().get(RPAConst.WEBCLIENT);
+    }
+
+    if (webClient == null) {
+      // 环境变更里没有就新建
+      webClient = new WebClient(BrowserVersion.CHROME);
+      setWebClientDefaultValue(webClient);
+    }
+
+    getTopContainer().getContext().put(RPAConst.WEBCLIENT, webClient);
     return webClient;
   }
 

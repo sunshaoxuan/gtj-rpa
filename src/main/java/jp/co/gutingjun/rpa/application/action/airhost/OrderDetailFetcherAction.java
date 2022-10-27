@@ -12,7 +12,7 @@ public class OrderDetailFetcherAction extends DocDetailFORMFetcherActionModel {
   }
 
   @Override
-  protected Object doAction(Object inputData) {
+  protected Object doAction() {
     setFormId("edit_booking_" + getOrderId());
     return fetchDataMap();
   }

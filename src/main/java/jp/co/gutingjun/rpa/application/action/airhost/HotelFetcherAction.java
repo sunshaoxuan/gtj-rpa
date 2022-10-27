@@ -3,6 +3,8 @@ package jp.co.gutingjun.rpa.application.action.airhost;
 import jp.co.gutingjun.rpa.common.RPAConst;
 import org.springframework.stereotype.Component;
 
+import java.util.Map;
+
 /** AirHost动作：读取所有房源数据 */
 @Component
 public class HotelFetcherAction extends PagedDataFetcherActionModel {
@@ -25,7 +27,9 @@ public class HotelFetcherAction extends PagedDataFetcherActionModel {
   }
 
   @Override
-  protected Object doAction(Object inputData) {
-    return fetchDataList(RPAConst.TAG_HOUSEDATA);
+  protected Object doAction() {
+    Map result = fetchDataList(RPAConst.TAG_HOUSEDATA);
+    setOutputData(result);
+    return result != null && result.size() > 0 && result.containsKey("result");
   }
 }

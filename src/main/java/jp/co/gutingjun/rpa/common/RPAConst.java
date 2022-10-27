@@ -61,4 +61,8 @@ public class RPAConst {
   public static final String TAG_ORDERID = "$ORDERID$";
   /** selenium虚拟网络客户端 */
   public static String WEBDRIVER = "WEBDRIVER";
+  /** 上一节点输出数据 */
+  public static String LASTOUTPUTDATA = "LastOutputData";
+  /** 上一节点执行结果 */
+  public static String LASTEXECUTERESULT = "LastExecuteResult";
 }

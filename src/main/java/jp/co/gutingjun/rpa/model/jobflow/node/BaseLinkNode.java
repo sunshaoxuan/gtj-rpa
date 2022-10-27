@@ -1,7 +1,7 @@
 package jp.co.gutingjun.rpa.model.jobflow.node;
 
 import jp.co.gutingjun.rpa.model.jobflow.condition.ICondition;
-import jp.co.gutingjun.rpa.model.jobflow.condition.LogicalCondition;
+import jp.co.gutingjun.rpa.model.jobflow.condition.LogicalConditionModel;
 
 import java.util.Map;
 import java.util.Optional;
@@ -32,8 +32,8 @@ public class BaseLinkNode extends LinkNodeModel {
     if (conditionMap != null && conditionMap.size() > 0) {
       Optional<Map.Entry<String, Object>> rootCondition =
           conditionMap.entrySet().stream().findFirst();
-      LogicalCondition condition =
-          LogicalCondition.getCondition(
+      LogicalConditionModel condition =
+          LogicalConditionModel.getCondition(
               rootCondition.get().getKey(),
               rootCondition.get().getValue(),
               getParent().getActions() == null || getParent().getActions().length == 0

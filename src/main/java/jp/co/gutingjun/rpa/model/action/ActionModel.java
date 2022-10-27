@@ -1,12 +1,14 @@
-package jp.co.gutingjun.rpa.model.action.base;
+package jp.co.gutingjun.rpa.model.action;
 
 import jp.co.gutingjun.rpa.common.CommonUtils;
 import jp.co.gutingjun.rpa.common.OnErrorHandleEnum;
+import jp.co.gutingjun.rpa.inf.IContainer;
+import jp.co.gutingjun.rpa.model.jobflow.node.JobActionNode;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-public abstract class ActionModel implements IAction {
+public abstract class ActionModel implements IAction, IContainer<JobActionNode> {
   private final Long id;
 
   private Object inputData;
@@ -18,10 +20,30 @@ public abstract class ActionModel implements IAction {
 
   private Map<String, Object> context;
 
+  private JobActionNode parentContainer;
   private List<Class<? extends IAction>> dependActionClasses;
 
   public ActionModel() {
     id = CommonUtils.getNextID();
+  }
+
+  @Override
+  public IContainer getContainer() {
+    return this;
+  }
+
+  @Override
+  public IContainer getTopContainer() {
+    return getParentContainer() != null ? getParentContainer().getTopContainer() : null;
+  }
+
+  @Override
+  public JobActionNode getParentContainer() {
+    return parentContainer;
+  }
+
+  public void setParentContainer(JobActionNode parentContainer) {
+    this.parentContainer = parentContainer;
   }
 
   @Override
@@ -106,7 +128,7 @@ public abstract class ActionModel implements IAction {
    *
    * @return
    */
-  protected abstract Object doAction(Object inputData);
+  protected abstract Object doAction();
 
   /**
    * 执行动作后事件处理
@@ -122,19 +144,17 @@ public abstract class ActionModel implements IAction {
     setInputData(beforeDoAction(getInputData()));
 
     try {
-      validate(getInputData());
+      validate();
     } catch (Throwable ex) {
       throw new RuntimeException(ex.getMessage());
     }
 
     // 执行动作
-    Object outputData = doAction(getInputData());
+    Object returnValue = doAction();
 
     // 执行动作后事件处理
-    outputData = afterDoAction(outputData);
+    setOutputData(afterDoAction(getOutputData()));
 
-    setOutputData(outputData);
-
-    return outputData;
+    return returnValue;
   }
 }

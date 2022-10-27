@@ -14,8 +14,8 @@ class PostRestServiceActionTest {
   @Test
   public void doAction() {
     UserPassCodeLoginAction loginAction = new UserPassCodeLoginAction();
-    loginAction.setUserEmail("sun.shaoxuan@51fanxing.co.jp");
-    loginAction.setDefaultPasscode("2981");
+    loginAction.getContext().put(RPAConst.USERNAME, "sun.shaoxuan@51fanxing.co.jp");
+    loginAction.getContext().put(RPAConst.PASSWORD, "2981");
     boolean rtn = (boolean) loginAction.execute();
 
     if (rtn) {

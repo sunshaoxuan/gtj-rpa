@@ -3,27 +3,50 @@ package jp.co.gutingjun.rpa.model.jobflow.node;
 import jp.co.gutingjun.common.pms.TreeNode;
 import jp.co.gutingjun.rpa.common.CommonUtils;
 import jp.co.gutingjun.rpa.common.NodeTypeEnum;
+import jp.co.gutingjun.rpa.common.RPAConst;
 import jp.co.gutingjun.rpa.exception.InvalidJobNodeException;
-import jp.co.gutingjun.rpa.model.action.base.IAction;
+import jp.co.gutingjun.rpa.inf.IContainer;
+import jp.co.gutingjun.rpa.model.action.IAction;
+import jp.co.gutingjun.rpa.model.bot.BotInstance;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 @Slf4j
-public abstract class JobNodeModel extends TreeNode<LinkNodeModel> implements IJobNode {
-
+public abstract class JobNodeModel extends TreeNode<LinkNodeModel>
+    implements IJobNode, IContainer<BotInstance> {
+  private BotInstance parentContainer;
   /** 动作集 */
   private IAction[] actions;
-
   /** 环境变量集合 */
   private Map<String, Object> context;
 
   public JobNodeModel() {
     setId(CommonUtils.getNextID());
+  }
+
+  @Override
+  public IContainer getContainer() {
+    return this;
+  }
+
+  @Override
+  public IContainer getTopContainer() {
+    return getParentContainer() != null ? getParentContainer().getTopContainer() : null;
+  }
+
+  @Override
+  public BotInstance getParentContainer() {
+    return parentContainer;
+  }
+
+  public void setParentContainer(BotInstance parentContainer) {
+    this.parentContainer = parentContainer;
   }
 
   @Override
@@ -66,46 +89,83 @@ public abstract class JobNodeModel extends TreeNode<LinkNodeModel> implements IJ
 
   /** 执行工作 */
   public void execute() {
-    Map<String, Object> outputData = new HashMap<>();
-    Map<String, Object> actionContext = new HashMap<>();
+    log.info("    [" + getShowName() + "] 节点开始");
     // 执行本节点所有动作
     Arrays.stream(getActions())
         .forEach(
             action -> {
-              // 将节点环境变量传递给动作使用
-              CommonUtils.mapPutAll(action.getContext(), getContext());
-
-              // 将上一动作环境变量传递给下一动作使用
-              if (actionContext.size() > 0) {
-                CommonUtils.mapPutAll(action.getContext(), actionContext);
-              }
+              log.info("      [" + action.getClass().getSimpleName() + "] 动作开始");
+              // 处理节点间传递的输入数据
+              dealInputData(action);
+              log.info("      [" + action.getClass().getSimpleName() + "] 动作处理节点间传递输入数据");
 
               // 输出数据采集
-              outputData.put(action.getClass().getName() + "[" + getId() + "]", action.execute());
+              log.info("      [" + action.getClass().getSimpleName() + "] 动作执行");
+              Object returnValue = action.execute();
 
-              // 缓存本动作执行后的环境变更
-              CommonUtils.mapPutAll(actionContext, action.getContext());
+              log.info("      [" + action.getClass().getSimpleName() + "] 动作处理顶层容器环境变量");
+              getTopContainer().getContext().put(RPAConst.LASTEXECUTERESULT, returnValue);
+              getTopContainer().getContext().put(RPAConst.LASTOUTPUTDATA, action.getOutputData());
+              getTopContainer()
+                  .getContext()
+                  .put(
+                      this.getClass().getSimpleName()
+                          + "["
+                          + this.getTag()
+                          + "]."
+                          + action.getClass().getSimpleName(),
+                      action.getOutputData());
             });
+    log.info("    [" + getShowName() + "] 节点结束");
 
-    Map<String, Object> lastStepOutputData = new HashMap<>();
-    // 用本节点所有动作输出数据构造“上一节点输出数据”
-    lastStepOutputData.put(LASTOUTPUTDATA, outputData);
     // 取下级连线节点
     List<LinkNodeModel> linkers = getAllChildren();
     if (linkers != null || linkers.size() > 0) {
       linkers.stream()
           .forEach(
               linker -> {
-                // 执行连线评估
-                if (linker.eval()) {
-                  // 将“上一节点输出数据”传递给下一节点环境变量
-                  CommonUtils.mapPutAll(linker.getNextNode().getContext(), lastStepOutputData);
-                  // 将当前节点环境变更传递给下一节点
-                  CommonUtils.mapPutAll(linker.getNextNode().getContext(), getContext());
-                  // 执行评估结果为真的下级工作节点
-                  linker.getNextNode().execute();
+                linker.execute();
+              });
+    }
+  }
+
+  private void dealInputData(IAction action) {
+    if (action.getContext().size() > 0) {
+      action
+          .getContext()
+          .forEach(
+              (key, value) -> {
+                if (key.equalsIgnoreCase("INPUTDATA")) {
+                  action.setInputData(evalFormula((String) value));
                 }
               });
+    }
+  }
+
+  private Object evalFormula(String contextFormula) {
+    AtomicReference<Object> rtn = new AtomicReference<>();
+    String funcNameTag = "";
+    // TODO: 函数识别可改为正则匹配提高输入容错
+    // GETOUTPUTDATA
+    funcNameTag = "$GETOUTPUTDATA(";
+    getSingleRefFunctionValue(contextFormula, rtn, funcNameTag);
+    return rtn.get();
+  }
+
+  private void getSingleRefFunctionValue(
+      String contextFormula, AtomicReference<Object> rtn, String funcNameTag) {
+    if (contextFormula.contains(funcNameTag)) {
+      String formulaRef = contextFormula.replace(funcNameTag, "").replace(")$", "");
+      if (getTopContainer().getContext().size() > 0) {
+        getTopContainer()
+            .getContext()
+            .forEach(
+                (key, value) -> {
+                  if (((String) key).toUpperCase().startsWith(formulaRef.toUpperCase())) {
+                    rtn.set(value);
+                  }
+                });
+      }
     }
   }
 

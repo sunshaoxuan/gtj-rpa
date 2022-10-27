@@ -1,7 +1,6 @@
 package jp.co.gutingjun.rpa.application;
 
 import jp.co.gutingjun.common.util.JsonUtils;
-import jp.co.gutingjun.rpa.application.bot.SimpleBot;
 import jp.co.gutingjun.rpa.config.BotConfig;
 import jp.co.gutingjun.rpa.config.RabbitConfig;
 import jp.co.gutingjun.rpa.model.bot.BotInstance;
@@ -10,6 +9,8 @@ import jp.co.gutingjun.rpa.model.event.BaseEvent;
 import jp.co.gutingjun.rpa.model.event.EventTypeEnum;
 import jp.co.gutingjun.rpa.model.event.IEventHandler;
 import jp.co.gutingjun.rpa.model.jobflow.node.JobNodeModel;
+import jp.co.gutingjun.rpa.model.log.LogData;
+import jp.co.gutingjun.rpa.model.log.Logger;
 import jp.co.gutingjun.rpa.model.strategy.CycleStrategy;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -21,10 +22,13 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -52,8 +56,8 @@ public class BotBus implements Serializable {
   private final ExecutorService executeService =
       Executors.newFixedThreadPool(BotConfig.getExecutionPoolSize());
 
+  private final List<Future<Long>> executeFutures = new ArrayList<Future<Long>>();
   @Autowired BotBus botBus;
-
   @Autowired AmqpTemplate amqpTemplate;
 
   public BotBus() {
@@ -119,7 +123,7 @@ public class BotBus implements Serializable {
    * @throws Exception
    */
   public BotModel botRegister(String botContext) throws Exception {
-    BotModel newBot = new SimpleBot(JsonUtils.json2Map(botContext));
+    BotModel newBot = new BasicBot(JsonUtils.json2Map(botContext));
     AtomicBoolean added = new AtomicBoolean(false);
     if (getInstance().getCandidateSet().size() == 0) {
       getInstance().getCandidateSet().add(newBot);
@@ -143,28 +147,55 @@ public class BotBus implements Serializable {
   /** 扫描机器人执行缓冲，将缓存中的机器人推入执行线程 */
   @RabbitListener(queues = RabbitConfig.RPA_RUNNING_CACHE_QUEUE)
   public void runBot(Long id) {
-    BotModel botModel =
-        getCandidateSet().stream().filter(bot -> bot.getId().equals(id)).findFirst().get();
-    BotInstance newBot = new BotInstance();
-    newBot.buildBot(botModel);
-    // 监听机器人执行结束事件，叶子节点执行结束后视为机器人任务结束
-    newBot.registerEvent(
-        EventTypeEnum.FINISH,
-        (IEventHandler<BaseEvent>)
-            event -> {
-              if (event.getSoureObject() instanceof JobNodeModel) {
-                if (((JobNodeModel) event.getSoureObject()).isLeaf()) {
-                  // 机器节点结束在叶子结点，该机器人执行结束
-                  getInstance().getExecutingBot().remove(event.getSoureObject());
+    try {
+      BotModel botModel =
+          getCandidateSet().stream().filter(bot -> bot.getId().equals(id)).findFirst().get();
+      BotInstance newBot = new BotInstance();
+      newBot.initialize(botModel);
+      // 监听机器人执行结束事件，叶子节点执行结束后视为机器人任务结束
+      newBot.registerEvent(
+          EventTypeEnum.FINISH,
+          (IEventHandler<BaseEvent>)
+              event -> {
+                if (event.getSoureObject() instanceof JobNodeModel) {
+                  if (((JobNodeModel) event.getSoureObject()).isLeaf()) {
+                    // 机器节点结束在叶子结点，该机器人执行结束
+                    getInstance().getExecutingBot().remove(event.getSoureObject());
+                  }
                 }
+              });
+
+      if (!isBotExecuting(newBot) && newBot.isSingleton()) {
+        // 单例执行
+        executeFutures.add(getInstance().getExecuteService().submit(newBot));
+        Logger.log(
+            LogData.builder()
+                .botId(newBot.getId())
+                .botInstanceId(newBot.getInstanceId())
+                .actionName(newBot.getName())
+                .logTime(LocalDateTime.now())
+                .message("线程启动")
+                .build());
+        getInstance().getExecutingBot().add(newBot);
+      }
+    } catch (Exception ex) {
+      Logger.log(LogData.builder().logTime(LocalDateTime.now()).message(ex.getMessage()).build());
+    }
+  }
+
+  private boolean isBotExecuting(BotInstance newBot) {
+    AtomicBoolean exists = new AtomicBoolean(false);
+    getInstance()
+        .getExecutingBot()
+        .forEach(
+            bot -> {
+              if (bot.getId() == newBot.getId()) {
+                exists.set(true);
+                return;
               }
             });
 
-    if (!getInstance().getExecutingBot().contains(newBot) && newBot.isSingleton()) {
-      // 避免重复执行
-      getInstance().getExecuteService().execute(newBot);
-      getInstance().getExecutingBot().add(newBot);
-    }
+    return exists.get();
   }
 
   /**
@@ -194,7 +225,7 @@ public class BotBus implements Serializable {
 
   /** 扫描候选机器人清单，触发周期执行机器人 */
   @Scheduled(cron = "0/5 * * * * ?")
-  public void scanCandidates() {
+  public void botScan() {
     if (getInstance().getCandidateSet().size() > 0) {
       LocalDateTime now = LocalDateTime.now();
       getInstance().getCandidateSet().stream()
@@ -232,6 +263,35 @@ public class BotBus implements Serializable {
                   getInstance().pushBotToMQ(botModel);
                 }
               });
+    }
+
+    if (getInstance().getExecutingBot().size() > 0) {
+      if (executeFutures.size() > 0) {
+        for (Future<Long> executeFuture : executeFutures) {
+          try {
+            Long botId = executeFuture.get();
+            BotInstance runningBot =
+                getInstance().getExecutingBot().stream()
+                    .filter(bot -> bot.getInstanceId().equals(botId))
+                    .findFirst()
+                    .get();
+            Logger.log(
+                LogData.builder()
+                    .botId(runningBot.getId())
+                    .botInstanceId(runningBot.getInstanceId())
+                    .actionName(runningBot.getName())
+                    .logTime(LocalDateTime.now())
+                    .message("单实例线程结束")
+                    .build());
+            getInstance().getExecutingBot().remove(runningBot);
+          } catch (Exception ex) {
+            Logger.log(
+                LogData.builder().logTime(LocalDateTime.now()).message(ex.getMessage()).build());
+          }
+        }
+      } else {
+        getInstance().getExecutingBot().clear();
+      }
     }
   }
 

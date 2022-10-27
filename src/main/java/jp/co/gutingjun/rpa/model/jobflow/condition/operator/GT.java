@@ -1,8 +1,8 @@
 package jp.co.gutingjun.rpa.model.jobflow.condition.operator;
 
-import jp.co.gutingjun.rpa.model.jobflow.condition.LogicalCondition;
+import jp.co.gutingjun.rpa.model.jobflow.condition.LogicalConditionModel;
 
-public class GT extends LogicalCondition {
+public class GT extends LogicalConditionModel {
   @Override
   public Operator getOperator() {
     return Operator.GT;

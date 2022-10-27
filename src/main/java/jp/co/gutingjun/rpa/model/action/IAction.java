@@ -1,4 +1,4 @@
-package jp.co.gutingjun.rpa.model.action.base;
+package jp.co.gutingjun.rpa.model.action;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -64,7 +64,7 @@ public interface IAction extends Serializable {
    *
    * @throws Exception
    */
-  void validate(Object inputData) throws Exception;
+  void validate() throws Exception;
 
   /** 执行动作 */
   Object execute();

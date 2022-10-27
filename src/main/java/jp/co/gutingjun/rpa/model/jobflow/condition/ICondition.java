@@ -3,8 +3,12 @@ package jp.co.gutingjun.rpa.model.jobflow.condition;
 import java.io.Serializable;
 
 public interface ICondition extends Serializable {
+  Operator getOperator();
+
+  boolean getValue();
+
   /** 逻辑运算符 */
-  public enum Operator {
+  enum Operator {
     /** 大于 */
     GT,
 
@@ -34,8 +38,4 @@ public interface ICondition extends Serializable {
     /** 同或 */
     XNOR
   }
-
-  Operator getOperator();
-
-  boolean getValue();
 }

@@ -24,99 +24,131 @@ public class EntireHotelInfoFetcherAction extends HotelFetcherAction {
   }
 
   @Override
-  protected Object doAction(Object inputData) {
-    Map<String, Object> hotelInfoMap = (Map<String, Object>) super.doAction(inputData);
-    if (hotelInfoMap.size() > 0) {
-      ((List) hotelInfoMap.get("result"))
-          .forEach(
-              hotel -> {
-                String id = (String) ((Map<String, Object>) hotel).get("id");
+  protected Object doAction() {
+    if (this.getContext().containsKey("HOUSEID")) {
+      super.setHouseId(Long.parseLong((String) this.getContext().get("HOUSEID")));
+    }
+    boolean result = (boolean) super.doAction();
+    if (result) {
+      Map<String, Object> hotelInfoMap = (Map<String, Object>) super.getOutputData();
+      if (hotelInfoMap.size() > 0) {
+        ((List) hotelInfoMap.get("result"))
+            .forEach(
+                hotel -> {
+                  String id = (String) ((Map<String, Object>) hotel).get("id");
 
-                // HotelDetail
-                HotelDetailFetcherAction hotelDetailAction = new HotelDetailFetcherAction();
-                CommonUtils.mapPutAll(hotelDetailAction.getContext(), this.getContext());
-                hotelDetailAction.setHouseId(Long.parseLong(id));
-                hotelDetailAction.setURL(
-                    "https://cloud.airhost.co/en/houses/" + RPAConst.TAG_HOUSEID + ".json");
-                Map hotelDetailMap = (Map) hotelDetailAction.execute();
-                CommonUtils.mapPutAll((Map<String, Object>) hotel, hotelDetailMap);
+                  // HotelDetail
+                  HotelDetailFetcherAction hotelDetailAction = new HotelDetailFetcherAction();
+                  hotelDetailAction.setParentContainer(this.getParentContainer());
+                  CommonUtils.mapPutAll(hotelDetailAction.getContext(), this.getContext());
+                  hotelDetailAction.setHouseId(Long.parseLong(id));
+                  hotelDetailAction.setURL(
+                      "https://cloud.airhost.co/en/houses/" + RPAConst.TAG_HOUSEID + ".json");
+                  hotelDetailAction.execute();
+                  Map hotelDetailMap = (Map) hotelDetailAction.getOutputData();
+                  CommonUtils.mapPutAll((Map<String, Object>) hotel, hotelDetailMap);
 
-                CommonUtils.sleepRandomSeconds(getMaxSleepSeconds());
+                  CommonUtils.sleepRandomSeconds(getMaxSleepSeconds());
 
-                // RoomType
-                RoomTypeFetcherAction roomTypeAction = new RoomTypeFetcherAction();
-                CommonUtils.mapPutAll(roomTypeAction.getContext(), hotelDetailAction.getContext());
-                roomTypeAction.setHouseId(Long.parseLong(id));
-                roomTypeAction.setURL(
-                    "https://cloud.airhost.co/en/houses/" + RPAConst.TAG_HOUSEID + "/rooms.json");
-                Map roomTypeMap = (Map) roomTypeAction.execute();
+                  // RoomType
+                  RoomTypeFetcherAction roomTypeAction = new RoomTypeFetcherAction();
+                  roomTypeAction.setParentContainer(this.getParentContainer());
+                  CommonUtils.mapPutAll(
+                      roomTypeAction.getContext(), hotelDetailAction.getContext());
+                  roomTypeAction.setHouseId(Long.parseLong(id));
+                  roomTypeAction.setURL(
+                      "https://cloud.airhost.co/en/houses/" + RPAConst.TAG_HOUSEID + "/rooms.json");
+                  roomTypeAction.execute();
+                  Map roomTypeMap =
+                      (Map)
+                          (roomTypeAction.getOutputData() != null
+                                  && ((Map) roomTypeAction.getOutputData()).containsKey(id)
+                              ? ((Map<?, ?>) roomTypeAction.getOutputData()).get(id)
+                              : roomTypeAction.getOutputData());
 
-                CommonUtils.sleepRandomSeconds(getMaxSleepSeconds());
+                  CommonUtils.sleepRandomSeconds(getMaxSleepSeconds());
 
-                HotelPictureFetcherAction pictureAction = new HotelPictureFetcherAction();
-                ((List) roomTypeMap.get("rooms"))
-                    .forEach(
-                        typeMap -> {
-                          String typeid = (String) ((Map) typeMap).get("id");
-                          RoomTypeDetailFetcherAction roomTypeDetailAction =
-                              new RoomTypeDetailFetcherAction();
-                          CommonUtils.mapPutAll(
-                              roomTypeDetailAction.getContext(), this.getContext());
-                          CommonUtils.mapPutAll(
-                              roomTypeDetailAction.getContext(), this.getContext());
-                          roomTypeDetailAction.setHouseId(Long.parseLong(id));
-                          roomTypeDetailAction.setRoomTypeId(Long.parseLong(typeid));
-                          roomTypeDetailAction.setURL(
-                              "https://cloud.airhost.co/en/houses/"
-                                  + RPAConst.TAG_HOUSEID
-                                  + "/rooms/"
-                                  + RPAConst.TAG_ROOMTYPEID
-                                  + ".json");
-                          Map roomTypeDetail = (Map) roomTypeDetailAction.execute();
-                          CommonUtils.mapPutAll((Map) typeMap, (Map) roomTypeDetail.get("room"));
-                          CommonUtils.sleepRandomSeconds(getMaxSleepSeconds());
-                          CommonUtils.mapPutAll(pictureAction.getContext(), this.getContext());
-                          pictureAction.setHouseId(Long.parseLong(id));
-                          pictureAction.setRoomTypeId(Long.parseLong(typeid));
-                          pictureAction.setURL(
-                              "https://cloud.airhost.co/en/houses/"
-                                  + RPAConst.TAG_HOUSEID
-                                  + "/rooms/"
-                                  + RPAConst.TAG_ROOMTYPEID
-                                  + "/photos.json");
-                          Map picList = (Map) pictureAction.execute();
-                          CommonUtils.mapPutAll((Map) typeMap, picList);
-                        });
+                  HotelPictureFetcherAction pictureAction = new HotelPictureFetcherAction();
+                  pictureAction.setParentContainer(this.getParentContainer());
+                  ((List) roomTypeMap.get("rooms"))
+                      .forEach(
+                          typeMap -> {
+                            String typeid = (String) ((Map) typeMap).get("id");
+                            RoomTypeDetailFetcherAction roomTypeDetailAction =
+                                new RoomTypeDetailFetcherAction();
+                            roomTypeDetailAction.setParentContainer(this.getParentContainer());
+                            CommonUtils.mapPutAll(
+                                roomTypeDetailAction.getContext(), this.getContext());
+                            CommonUtils.mapPutAll(
+                                roomTypeDetailAction.getContext(), this.getContext());
+                            roomTypeDetailAction.setHouseId(Long.parseLong(id));
+                            roomTypeDetailAction.setRoomTypeId(Long.parseLong(typeid));
+                            roomTypeDetailAction.setURL(
+                                "https://cloud.airhost.co/en/houses/"
+                                    + RPAConst.TAG_HOUSEID
+                                    + "/rooms/"
+                                    + RPAConst.TAG_ROOMTYPEID
+                                    + ".json");
+                            roomTypeDetailAction.execute();
+                            Map roomTypeDetail = (Map) roomTypeDetailAction.getOutputData();
+                            CommonUtils.mapPutAll((Map) typeMap, (Map) roomTypeDetail.get("room"));
+                            CommonUtils.sleepRandomSeconds(getMaxSleepSeconds());
+                            CommonUtils.mapPutAll(pictureAction.getContext(), this.getContext());
+                            pictureAction.setHouseId(Long.parseLong(id));
+                            pictureAction.setRoomTypeId(Long.parseLong(typeid));
+                            pictureAction.setURL(
+                                "https://cloud.airhost.co/en/houses/"
+                                    + RPAConst.TAG_HOUSEID
+                                    + "/rooms/"
+                                    + RPAConst.TAG_ROOMTYPEID
+                                    + "/photos.json");
+                            pictureAction.execute();
+                            Map picList = (Map) pictureAction.getOutputData();
+                            CommonUtils.mapPutAll((Map) typeMap, picList);
+                          });
 
-                Map<String, Object> mapRoomTypeData = new HashMap<>();
-                mapRoomTypeData.put("rooms_type", roomTypeMap.get("rooms"));
-                CommonUtils.mapPutAll(((Map<String, Object>) hotel), mapRoomTypeData);
+                  Map<String, Object> mapRoomTypeData = new HashMap<>();
+                  mapRoomTypeData.put("rooms_type", roomTypeMap.get("rooms"));
+                  CommonUtils.mapPutAll(((Map<String, Object>) hotel), mapRoomTypeData);
 
-                CommonUtils.sleepRandomSeconds(getMaxSleepSeconds());
+                  CommonUtils.sleepRandomSeconds(getMaxSleepSeconds());
 
-                // RoomList
-                HotelRoomFetcherAction roomAction = new HotelRoomFetcherAction();
-                CommonUtils.mapPutAll(roomAction.getContext(), this.getContext());
-                roomAction.setHouseId(Long.parseLong(id));
-                roomAction.setURL(
-                    "https://cloud.airhost.co/en/houses/"
-                        + RPAConst.TAG_HOUSEID
-                        + "/room_units.json");
-                Map roomMap = (Map) roomAction.execute();
-                ((Map<String, Object>) hotel).put("rooms", roomMap.get("room_units"));
+                  // RoomList
+                  HotelRoomFetcherAction roomAction = new HotelRoomFetcherAction();
+                  roomAction.setParentContainer(this.getParentContainer());
+                  CommonUtils.mapPutAll(roomAction.getContext(), this.getContext());
+                  roomAction.setHouseId(Long.parseLong(id));
+                  roomAction.setURL(
+                      "https://cloud.airhost.co/en/houses/"
+                          + RPAConst.TAG_HOUSEID
+                          + "/room_units.json");
+                  roomAction.execute();
+                  Map roomMap =
+                      roomAction.getOutputData() != null
+                              && ((Map) roomAction.getOutputData()).containsKey(id)
+                          ? (Map) ((Map) roomAction.getOutputData()).get(id)
+                          : (Map) roomAction.getOutputData();
+                  ((Map<String, Object>) hotel).put("rooms", roomMap.get("room_units"));
 
-                CommonUtils.sleepRandomSeconds(getMaxSleepSeconds());
+                  CommonUtils.sleepRandomSeconds(getMaxSleepSeconds());
 
-                // HotelPicture
-                CommonUtils.mapPutAll(pictureAction.getContext(), this.getContext());
-                pictureAction.setHouseId(Long.parseLong(id));
-                pictureAction.setURL(
-                    "https://cloud.airhost.co/en/houses/" + RPAConst.TAG_HOUSEID + "/photos.json");
-                Map picMap = (Map) pictureAction.execute();
-                ((Map<String, Object>) hotel).put("house_pictures", picMap);
-              });
+                  // HotelPicture
+                  CommonUtils.mapPutAll(pictureAction.getContext(), this.getContext());
+                  pictureAction.setHouseId(Long.parseLong(id));
+                  pictureAction.setURL(
+                      "https://cloud.airhost.co/en/houses/"
+                          + RPAConst.TAG_HOUSEID
+                          + "/photos.json");
+                  pictureAction.execute();
+                  Map picMap = (Map) pictureAction.getOutputData();
+                  ((Map<String, Object>) hotel).put("house_pictures", picMap);
+                });
+      }
+
+      setOutputData(hotelInfoMap);
+      return hotelInfoMap.size() > 0 && hotelInfoMap.containsKey("result");
     }
 
-    return hotelInfoMap;
+    return false;
   }
 }

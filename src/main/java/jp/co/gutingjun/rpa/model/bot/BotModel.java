@@ -3,11 +3,12 @@ package jp.co.gutingjun.rpa.model.bot;
 import jp.co.gutingjun.common.util.ObjectUtils;
 import jp.co.gutingjun.rpa.application.action.BaseActionFetcher;
 import jp.co.gutingjun.rpa.common.*;
-import jp.co.gutingjun.rpa.model.action.base.AbsoluteActionFetcher;
-import jp.co.gutingjun.rpa.model.action.base.IAction;
+import jp.co.gutingjun.rpa.model.action.AbsoluteActionFetcher;
+import jp.co.gutingjun.rpa.model.action.IAction;
 import jp.co.gutingjun.rpa.model.event.BaseEvent;
 import jp.co.gutingjun.rpa.model.event.EventManager;
 import jp.co.gutingjun.rpa.model.event.EventTypeEnum;
+import jp.co.gutingjun.rpa.model.jobflow.condition.operator.EQ;
 import jp.co.gutingjun.rpa.model.jobflow.node.*;
 import jp.co.gutingjun.rpa.model.strategy.CycleStrategy;
 import jp.co.gutingjun.rpa.model.strategy.IBotStrategy;
@@ -78,12 +79,12 @@ public abstract class BotModel extends EventManager implements IBot {
   }
 
   /**
-   * 用模型设置数据初始化机器人
+   * 用模型设置数据构建机器人
    *
    * @param botSettings 模型设置数据
    */
   @Override
-  public void load(Map<String, Object> botSettings) {
+  public void build(Map<String, Object> botSettings) {
     setBasePropertyBySetting(botSettings);
     setStrategyBySetting(botSettings);
     createJobNodes(botSettings);
@@ -190,13 +191,27 @@ public abstract class BotModel extends EventManager implements IBot {
           .filter(node -> node.isLeaf())
           .forEach(
               node -> {
-                JobEndNode endNode = new JobEndNode();
-                BaseLinkNode newTrueLink = new BaseLinkNode();
-                newTrueLink.appendChild(endNode);
-                newTrueLink.setParent(node);
-                newTrueLink.setShowName("无条件结束");
-                endNode.setParent(newTrueLink);
-                node.appendChild(newTrueLink);
+                if (!(node instanceof JobEndNode)) {
+                  JobEndNode endNode = new JobEndNode();
+                  BaseLinkNode newTrueLink = new BaseLinkNode();
+                  newTrueLink.appendChild(endNode);
+                  newTrueLink.setRuleCondition(new EQ("True", "True"));
+                  newTrueLink.setParent(node);
+                  newTrueLink.setShowName("无条件结束");
+                  endNode.setParent(newTrueLink);
+                  node.appendChild(newTrueLink);
+                }
+              });
+
+      // 如果配置文件中定义了结束连线，自动补充结束结点
+      addedJobNodes.stream()
+          .forEach(
+              node -> {
+                if (node.getNextNode() != null
+                    && node.getNextNode() instanceof BaseLinkNode
+                    && node.getNextNode().getChildrenCount() == 0) {
+                  node.getNextNode().appendChild(new JobEndNode());
+                }
               });
 
       setJobNode((JobNodeModel) currentNode.getRoot());
@@ -312,15 +327,23 @@ public abstract class BotModel extends EventManager implements IBot {
   public void start() {
     // 启动异步事件处理线程
     startSyncEventDispatchThread();
+    log.info("  启动异步事件处理线程");
     dispatchEvent(new BaseEvent(EventTypeEnum.RUN, this, true));
 
     // 机器人开始执行
-    JobNodeModel currentJobNode = getJobNode();
-    if (currentJobNode != null) {
-      // 派发节点开始事件
-      dispatchEvent(new BaseEvent(EventTypeEnum.RUN, currentJobNode, true));
-      currentJobNode.execute();
-      dispatchEvent(new BaseEvent(EventTypeEnum.FINISH, currentJobNode, true));
+    log.info("  工作流开始执行");
+
+    try {
+      JobNodeModel currentJobNode = getJobNode();
+      if (currentJobNode != null) {
+        // 派发节点开始事件
+        dispatchEvent(new BaseEvent(EventTypeEnum.RUN, currentJobNode, true));
+        currentJobNode.execute();
+        dispatchEvent(new BaseEvent(EventTypeEnum.FINISH, currentJobNode, true));
+      }
+    } finally {
+      log.info("  工作流执行结束");
+      log.info("机器人 [" + this.getName() + "] 执行结束");
     }
   }
 

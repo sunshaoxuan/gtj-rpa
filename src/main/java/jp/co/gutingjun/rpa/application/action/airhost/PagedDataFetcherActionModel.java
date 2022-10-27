@@ -6,7 +6,7 @@ import jp.co.gutingjun.common.util.JsonUtils;
 import jp.co.gutingjun.common.util.PageUtil;
 import jp.co.gutingjun.rpa.common.CommonUtils;
 import jp.co.gutingjun.rpa.common.RPAConst;
-import jp.co.gutingjun.rpa.model.action.web.WebClientActionModel;
+import jp.co.gutingjun.rpa.model.action.WebClientActionModel;
 
 import java.util.ArrayList;
 import java.util.HashMap;

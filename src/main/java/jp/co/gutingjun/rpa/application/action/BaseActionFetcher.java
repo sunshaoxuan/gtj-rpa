@@ -1,8 +1,8 @@
 package jp.co.gutingjun.rpa.application.action;
 
 import jp.co.gutingjun.rpa.common.PackageClassLoader;
-import jp.co.gutingjun.rpa.model.action.base.AbsoluteActionFetcher;
-import jp.co.gutingjun.rpa.model.action.base.IAction;
+import jp.co.gutingjun.rpa.model.action.AbsoluteActionFetcher;
+import jp.co.gutingjun.rpa.model.action.IAction;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;

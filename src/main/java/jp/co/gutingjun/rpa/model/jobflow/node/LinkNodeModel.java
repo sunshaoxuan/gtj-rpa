@@ -3,14 +3,20 @@ package jp.co.gutingjun.rpa.model.jobflow.node;
 import jp.co.gutingjun.common.pms.TreeNode;
 import jp.co.gutingjun.rpa.common.CommonUtils;
 import jp.co.gutingjun.rpa.common.NodeTypeEnum;
+import jp.co.gutingjun.rpa.inf.IContainer;
+import jp.co.gutingjun.rpa.model.bot.BotInstance;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class LinkNodeModel extends TreeNode<JobNodeModel> implements ILinkNode {
+@Slf4j
+public abstract class LinkNodeModel extends TreeNode<JobNodeModel>
+    implements ILinkNode, IContainer<BotInstance> {
   /** 环境变量集合 */
   private Map<String, Object> context;
 
+  private BotInstance parentContainer;
   /** 上级节点标签 */
   private String PriorTag;
 
@@ -66,4 +72,32 @@ public abstract class LinkNodeModel extends TreeNode<JobNodeModel> implements IL
 
   @Override
   public void validate() throws Exception {}
+
+  @Override
+  public IContainer getContainer() {
+    return this;
+  }
+
+  @Override
+  public BotInstance getParentContainer() {
+    return parentContainer;
+  }
+
+  public void setParentContainer(BotInstance parentContainer) {
+    this.parentContainer = parentContainer;
+  }
+
+  @Override
+  public IContainer getTopContainer() {
+    return getParentContainer() != null ? getParentContainer().getTopContainer() : null;
+  }
+
+  public void execute() {
+    log.info("    [" + getShowName() + "] 连线节点执行");
+    // 执行连线评估
+    if (eval()) {
+      // 执行评估结果为真的下级工作节点
+      getNextNode().execute();
+    }
+  }
 }

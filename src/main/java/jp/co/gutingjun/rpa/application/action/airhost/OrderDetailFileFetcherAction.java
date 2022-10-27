@@ -3,7 +3,7 @@ package jp.co.gutingjun.rpa.application.action.airhost;
 import com.gargoylesoftware.htmlunit.TextPage;
 import com.gargoylesoftware.htmlunit.WebResponse;
 import jp.co.gutingjun.rpa.common.RPAConst;
-import jp.co.gutingjun.rpa.model.action.web.WebClientActionModel;
+import jp.co.gutingjun.rpa.model.action.WebClientActionModel;
 import org.apache.log4j.lf5.util.StreamUtils;
 
 import java.io.InputStream;
@@ -51,7 +51,7 @@ public class OrderDetailFileFetcherAction extends WebClientActionModel {
   }
 
   @Override
-  protected Object doAction(Object inputData) {
+  protected Object doAction() {
     Map<String, Object> dataMap = new HashMap<>();
     List<String> lineData = new ArrayList<>();
     List<Map<String, Object>> dataList = new ArrayList<>();
@@ -135,7 +135,7 @@ public class OrderDetailFileFetcherAction extends WebClientActionModel {
   }
 
   @Override
-  public void validate(Object inputData) throws Exception {
+  public void validate() throws Exception {
     if (getBeginDate() == null) {
       throw new RuntimeException("开始日期不能为空。");
     }

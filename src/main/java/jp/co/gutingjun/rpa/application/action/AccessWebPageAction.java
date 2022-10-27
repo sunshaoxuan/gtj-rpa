@@ -2,7 +2,7 @@ package jp.co.gutingjun.rpa.application.action;
 
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import jp.co.gutingjun.rpa.common.RPAConst;
-import jp.co.gutingjun.rpa.model.action.web.WebClientActionModel;
+import jp.co.gutingjun.rpa.model.action.WebClientActionModel;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -16,7 +16,7 @@ public class AccessWebPageAction extends WebClientActionModel {
   }
 
   @Override
-  protected Object doAction(Object inputData) {
+  protected Object doAction() {
     String result = null;
     try {
       HtmlPage page = getWebClient().getPage((String) getContext().get(RPAConst.URL));
@@ -37,7 +37,7 @@ public class AccessWebPageAction extends WebClientActionModel {
   }
 
   @Override
-  public void validate(Object inputData) throws Exception {
-    super.validate(inputData);
+  public void validate() throws Exception {
+    super.validate();
   }
 }

@@ -2,7 +2,7 @@ package jp.co.gutingjun.rpa.application.action.airhost;
 
 import com.gargoylesoftware.htmlunit.html.*;
 import jp.co.gutingjun.rpa.common.RPAConst;
-import jp.co.gutingjun.rpa.model.action.web.WebClientActionModel;
+import jp.co.gutingjun.rpa.model.action.WebClientActionModel;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -20,35 +20,46 @@ public class UserPasswordLoginAction extends WebClientActionModel {
   }
 
   @Override
-  protected Object doAction(Object inputData) {
+  protected Object doAction() {
     try {
       setOutputData(Boolean.FALSE);
+
+      boolean skipLogin = false;
       HtmlPage page = getWebClient().getPage((String) getContext().get(RPAConst.URL));
-      HtmlForm form = getFormByIDOrName(page, (String) getContext().get(RPAConst.LOGIN_FORM_ID));
-      if (form == null) {
-        throw new RuntimeException("找不到登录表单 [" + getContext().get(RPAConst.LOGIN_FORM_ID) + "]");
+      if (page.getElementsByTagName("a").stream().count() > 0) {
+        if (page.getElementsByTagName("a").get(0).getTextContent().equals("redirected")) {
+          skipLogin = true;
+        }
       }
 
-      HtmlInput usernameInput =
-          getFormInputByID(form, (String) getContext().get(RPAConst.USERNAME_FIELD_ID));
-      if (usernameInput == null) {
-        throw new RuntimeException("找不到用户名输入框");
-      }
-      usernameInput.setValueAttribute((String) getContext().get(RPAConst.USERNAME));
+      if (!skipLogin) {
+        HtmlForm form = getFormByIDOrName(page, (String) getContext().get(RPAConst.LOGIN_FORM_ID));
+        if (form == null) {
+          throw new RuntimeException("找不到登录表单 [" + getContext().get(RPAConst.LOGIN_FORM_ID) + "]");
+        }
 
-      HtmlInput passwordInput =
-          getFormInputByID(form, (String) getContext().get(RPAConst.PASSWORD_FIELD_ID));
-      if (passwordInput == null) {
-        throw new RuntimeException("找不到密码输入框");
-      }
-      passwordInput.setValueAttribute((String) getContext().get(RPAConst.PASSWORD));
+        HtmlInput usernameInput =
+            getFormInputByID(form, (String) getContext().get(RPAConst.USERNAME_FIELD_ID));
+        if (usernameInput == null) {
+          throw new RuntimeException("找不到用户名输入框");
+        }
+        usernameInput.setValueAttribute((String) getContext().get(RPAConst.USERNAME));
 
-      HtmlButton btn = (HtmlButton) getHtmlElement(form, "button", "type", "submit");
-      if (btn == null) {
-        throw new RuntimeException("找不到登录提交按钮");
+        HtmlInput passwordInput =
+            getFormInputByID(form, (String) getContext().get(RPAConst.PASSWORD_FIELD_ID));
+        if (passwordInput == null) {
+          throw new RuntimeException("找不到密码输入框");
+        }
+        passwordInput.setValueAttribute((String) getContext().get(RPAConst.PASSWORD));
+
+        HtmlButton btn = (HtmlButton) getHtmlElement(form, "button", "type", "submit");
+        if (btn == null) {
+          throw new RuntimeException("找不到登录提交按钮");
+        }
+
+        btn.click();
       }
 
-      btn.click();
       page = getWebClient().getPage((String) getContext().get(RPAConst.LOADPAGE_AFTERLOGIN));
       HtmlListItem lstItem =
           (HtmlListItem)
@@ -79,8 +90,8 @@ public class UserPasswordLoginAction extends WebClientActionModel {
   }
 
   @Override
-  public void validate(Object inputData) throws Exception {
-    super.validate(inputData);
+  public void validate() throws Exception {
+    super.validate();
 
     if (!getContext().containsKey(RPAConst.LOGIN_FORM_ID)) {
       throw new RuntimeException("环境变量中应定义登录表单ID [UserPasswordLoginAction.LOGIN_FORM_ID]。");

@@ -1,7 +1,6 @@
-package jp.co.gutingjun.rpa.model.action.web;
+package jp.co.gutingjun.rpa.model.action;
 
 import jp.co.gutingjun.rpa.common.RPAConst;
-import jp.co.gutingjun.rpa.model.action.base.ActionModel;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -29,7 +28,7 @@ public abstract class WebActionModel extends ActionModel {
   }
 
   @Override
-  public void validate(Object inputData) throws Exception {
+  public void validate() throws Exception {
     AtomicBoolean exists = new AtomicBoolean(false);
     if (getContext() != null && getContext().size() > 0) {
       getContext()

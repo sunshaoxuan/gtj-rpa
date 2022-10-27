@@ -14,7 +14,14 @@ import java.util.concurrent.LinkedBlockingQueue;
 /** 同异步事件管理器 */
 @Slf4j
 public class EventManager implements Serializable {
+  // 事件类型与事件处理器列表的映射关系
+  private final Map<EventTypeEnum, List<IEventHandler<? extends BaseEvent>>> eventListenerMap =
+      new HashMap<>();
+  // 异步执行的事件队列
+  private final LinkedBlockingQueue<BaseEvent> eventQueue = new LinkedBlockingQueue<>();
   boolean finished = false;
+  /** 异步事件处理执行线程 */
+  private ExecutorService executorService;
 
   /** 取完成标志 */
   public boolean isFinished() {
@@ -25,9 +32,6 @@ public class EventManager implements Serializable {
   public void setFinished(boolean finished) {
     this.finished = finished;
   }
-
-  /** 异步事件处理执行线程 */
-  private ExecutorService executorService;
 
   /** 启动同步事件分发线程 */
   public void startSyncEventDispatchThread() {
@@ -52,13 +56,6 @@ public class EventManager implements Serializable {
   public void stopSyncEventService() {
     executorService.shutdown();
   }
-
-  // 事件类型与事件处理器列表的映射关系
-  private final Map<EventTypeEnum, List<IEventHandler<? extends BaseEvent>>> eventListenerMap =
-      new HashMap<>();
-
-  // 异步执行的事件队列
-  private LinkedBlockingQueue<BaseEvent> eventQueue = new LinkedBlockingQueue<>();
 
   /**
    * 注册事件
@@ -112,8 +109,6 @@ public class EventManager implements Serializable {
           log.error(e.getMessage());
         }
       }
-    } else {
-      log.error("未找到事件处理器");
     }
   }
 

@@ -74,7 +74,7 @@ public class OrderFetcherAction extends PagedDataFetcherActionModel {
   }
 
   @Override
-  protected Object doAction(Object inputData) {
+  protected Object doAction() {
     return fetchDataList(RPAConst.TAG_DATA);
   }
 }

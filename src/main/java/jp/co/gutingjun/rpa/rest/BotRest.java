@@ -10,6 +10,8 @@ import jp.co.gutingjun.rpa.inf.IUserService;
 import jp.co.gutingjun.rpa.model.bot.BotInstance;
 import jp.co.gutingjun.rpa.model.bot.BotModel;
 import jp.co.gutingjun.rpa.model.bot.IBot;
+import jp.co.gutingjun.rpa.model.jobflow.condition.LogicalConditionModel;
+import jp.co.gutingjun.rpa.model.jobflow.node.BaseLinkNode;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -94,6 +96,17 @@ public class BotRest {
         nd.put("type", curNode.getClass().getSimpleName());
         nd.put("parentnode", curNode.getParent() == null ? null : curNode.getParent().getId());
         nd.put("showname", curNode.getShowName());
+        if (curNode instanceof BaseLinkNode) {
+          LogicalConditionModel con =
+              (LogicalConditionModel) ((BaseLinkNode) curNode).getRuleCondition();
+          if (con != null) {
+            HashMap<Object, Object> condMap = new HashMap<>();
+            condMap.put("left", con.getLeft());
+            condMap.put("right", con.getRight());
+            condMap.put("operator", con.getOperator());
+            nd.put("condition", condMap);
+          }
+        }
         nds.add(nd);
         curNode = curNode.getNextNode();
       } while (curNode != null);
