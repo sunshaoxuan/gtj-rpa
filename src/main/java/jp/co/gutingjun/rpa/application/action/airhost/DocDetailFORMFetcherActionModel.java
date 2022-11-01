@@ -1,7 +1,7 @@
 package jp.co.gutingjun.rpa.application.action.airhost;
 
 import com.gargoylesoftware.htmlunit.html.*;
-import jp.co.gutingjun.rpa.common.CommonUtils;
+import jp.co.gutingjun.common.util.MapUtils;
 import jp.co.gutingjun.rpa.common.RPAConst;
 import jp.co.gutingjun.rpa.model.action.WebClientActionModel;
 import org.apache.commons.lang.StringUtils;
@@ -123,8 +123,8 @@ public abstract class DocDetailFORMFetcherActionModel extends WebClientActionMod
         (key, value) -> {
           String[] keys = key.split("\\[");
           Arrays.setAll(keys, i -> keys[i].replace("]", ""));
-          Map result = CommonUtils.getDataMap(keys, value);
-          CommonUtils.mapPutAll(fetchedMap, result);
+          Map result = MapUtils.getDataMap(keys, value);
+          MapUtils.mapPutAll(fetchedMap, result);
         });
 
     return fetchedMap;

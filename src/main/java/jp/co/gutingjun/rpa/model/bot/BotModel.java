@@ -1,5 +1,6 @@
 package jp.co.gutingjun.rpa.model.bot;
 
+import jp.co.gutingjun.common.util.MapUtils;
 import jp.co.gutingjun.common.util.ObjectUtils;
 import jp.co.gutingjun.rpa.application.action.BaseActionFetcher;
 import jp.co.gutingjun.rpa.common.*;
@@ -270,8 +271,7 @@ public abstract class BotModel extends EventManager implements IBot {
                                       newJobNode.getContext().put(key.toUpperCase(), value);
                                     });
                               }
-                              CommonUtils.mapPutAll(
-                                  newAction.getContext(), newJobNode.getContext());
+                              MapUtils.mapPutAll(newAction.getContext(), newJobNode.getContext());
                               newJobNode.appendAction(newAction);
                               linkNode.appendChild(newJobNode);
                               addedjobNodes.add(newJobNode);

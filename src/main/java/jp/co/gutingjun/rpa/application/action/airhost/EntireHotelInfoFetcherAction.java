@@ -1,5 +1,6 @@
 package jp.co.gutingjun.rpa.application.action.airhost;
 
+import jp.co.gutingjun.common.util.MapUtils;
 import jp.co.gutingjun.rpa.common.CommonUtils;
 import jp.co.gutingjun.rpa.common.RPAConst;
 
@@ -40,21 +41,20 @@ public class EntireHotelInfoFetcherAction extends HotelFetcherAction {
                   // HotelDetail
                   HotelDetailFetcherAction hotelDetailAction = new HotelDetailFetcherAction();
                   hotelDetailAction.setParentContainer(this.getParentContainer());
-                  CommonUtils.mapPutAll(hotelDetailAction.getContext(), this.getContext());
+                  MapUtils.mapPutAll(hotelDetailAction.getContext(), this.getContext());
                   hotelDetailAction.setHouseId(Long.parseLong(id));
                   hotelDetailAction.setURL(
                       "https://cloud.airhost.co/en/houses/" + RPAConst.TAG_HOUSEID + ".json");
                   hotelDetailAction.execute();
                   Map hotelDetailMap = (Map) hotelDetailAction.getOutputData();
-                  CommonUtils.mapPutAll((Map<String, Object>) hotel, hotelDetailMap);
+                  MapUtils.mapPutAll((Map<String, Object>) hotel, hotelDetailMap);
 
                   CommonUtils.sleepRandomSeconds(getMaxSleepSeconds());
 
                   // RoomType
                   RoomTypeFetcherAction roomTypeAction = new RoomTypeFetcherAction();
                   roomTypeAction.setParentContainer(this.getParentContainer());
-                  CommonUtils.mapPutAll(
-                      roomTypeAction.getContext(), hotelDetailAction.getContext());
+                  MapUtils.mapPutAll(roomTypeAction.getContext(), hotelDetailAction.getContext());
                   roomTypeAction.setHouseId(Long.parseLong(id));
                   roomTypeAction.setURL(
                       "https://cloud.airhost.co/en/houses/" + RPAConst.TAG_HOUSEID + "/rooms.json");
@@ -77,9 +77,9 @@ public class EntireHotelInfoFetcherAction extends HotelFetcherAction {
                             RoomTypeDetailFetcherAction roomTypeDetailAction =
                                 new RoomTypeDetailFetcherAction();
                             roomTypeDetailAction.setParentContainer(this.getParentContainer());
-                            CommonUtils.mapPutAll(
+                            MapUtils.mapPutAll(
                                 roomTypeDetailAction.getContext(), this.getContext());
-                            CommonUtils.mapPutAll(
+                            MapUtils.mapPutAll(
                                 roomTypeDetailAction.getContext(), this.getContext());
                             roomTypeDetailAction.setHouseId(Long.parseLong(id));
                             roomTypeDetailAction.setRoomTypeId(Long.parseLong(typeid));
@@ -91,9 +91,9 @@ public class EntireHotelInfoFetcherAction extends HotelFetcherAction {
                                     + ".json");
                             roomTypeDetailAction.execute();
                             Map roomTypeDetail = (Map) roomTypeDetailAction.getOutputData();
-                            CommonUtils.mapPutAll((Map) typeMap, (Map) roomTypeDetail.get("room"));
+                            MapUtils.mapPutAll((Map) typeMap, (Map) roomTypeDetail.get("room"));
                             CommonUtils.sleepRandomSeconds(getMaxSleepSeconds());
-                            CommonUtils.mapPutAll(pictureAction.getContext(), this.getContext());
+                            MapUtils.mapPutAll(pictureAction.getContext(), this.getContext());
                             pictureAction.setHouseId(Long.parseLong(id));
                             pictureAction.setRoomTypeId(Long.parseLong(typeid));
                             pictureAction.setURL(
@@ -104,19 +104,19 @@ public class EntireHotelInfoFetcherAction extends HotelFetcherAction {
                                     + "/photos.json");
                             pictureAction.execute();
                             Map picList = (Map) pictureAction.getOutputData();
-                            CommonUtils.mapPutAll((Map) typeMap, picList);
+                            MapUtils.mapPutAll((Map) typeMap, picList);
                           });
 
                   Map<String, Object> mapRoomTypeData = new HashMap<>();
                   mapRoomTypeData.put("rooms_type", roomTypeMap.get("rooms"));
-                  CommonUtils.mapPutAll(((Map<String, Object>) hotel), mapRoomTypeData);
+                  MapUtils.mapPutAll(((Map<String, Object>) hotel), mapRoomTypeData);
 
                   CommonUtils.sleepRandomSeconds(getMaxSleepSeconds());
 
                   // RoomList
                   HotelRoomFetcherAction roomAction = new HotelRoomFetcherAction();
                   roomAction.setParentContainer(this.getParentContainer());
-                  CommonUtils.mapPutAll(roomAction.getContext(), this.getContext());
+                  MapUtils.mapPutAll(roomAction.getContext(), this.getContext());
                   roomAction.setHouseId(Long.parseLong(id));
                   roomAction.setURL(
                       "https://cloud.airhost.co/en/houses/"
@@ -133,7 +133,7 @@ public class EntireHotelInfoFetcherAction extends HotelFetcherAction {
                   CommonUtils.sleepRandomSeconds(getMaxSleepSeconds());
 
                   // HotelPicture
-                  CommonUtils.mapPutAll(pictureAction.getContext(), this.getContext());
+                  MapUtils.mapPutAll(pictureAction.getContext(), this.getContext());
                   pictureAction.setHouseId(Long.parseLong(id));
                   pictureAction.setURL(
                       "https://cloud.airhost.co/en/houses/"
