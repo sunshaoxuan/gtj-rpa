@@ -1,5 +1,10 @@
 package jp.co.gutingjun.rpa.model.jobflow.condition.function;
 
+/**
+ * 取得数据函数
+ *
+ * @author sunsx
+ */
 public class GetDataFunction extends FunctionModel {
   @Override
   public String getFunctionName() {

@@ -2,6 +2,11 @@ package jp.co.gutingjun.rpa.rest;
 
 import lombok.Data;
 
+/**
+ * 用户数据
+ *
+ * @author sunsx
+ */
 @Data
 public class UserDTO {
     private String username;

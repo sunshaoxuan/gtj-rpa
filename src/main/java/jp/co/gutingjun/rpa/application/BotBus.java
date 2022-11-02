@@ -34,8 +34,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * 机器人总控
  *
- * @author ssx
- * @since 2022/08/20
+ * @author sunsx
  */
 @EnableScheduling
 @Component

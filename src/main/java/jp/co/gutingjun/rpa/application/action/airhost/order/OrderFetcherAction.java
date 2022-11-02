@@ -1,12 +1,20 @@
-package jp.co.gutingjun.rpa.application.action.airhost;
+package jp.co.gutingjun.rpa.application.action.airhost.order;
 
 import jp.co.gutingjun.common.util.DateUtil;
+import jp.co.gutingjun.rpa.application.action.airhost.login.UserPasswordLoginAction;
+import jp.co.gutingjun.rpa.application.action.airhost.model.PagedDataFetcherActionModel;
 import jp.co.gutingjun.rpa.common.RPAConst;
 import org.springframework.stereotype.Component;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.util.Map;
 
+/**
+ * AirHost动作：分页获取订单数据动作
+ *
+ * @author sunsx
+ * */
 @Component
 public class OrderFetcherAction extends PagedDataFetcherActionModel {
 
@@ -75,6 +83,8 @@ public class OrderFetcherAction extends PagedDataFetcherActionModel {
 
   @Override
   protected Object doAction() {
-    return fetchDataList(RPAConst.TAG_DATA);
+    Map result = fetchDataList(RPAConst.TAG_DATA);
+    setOutputData(result);
+    return result != null && result.size() > 0;
   }
 }

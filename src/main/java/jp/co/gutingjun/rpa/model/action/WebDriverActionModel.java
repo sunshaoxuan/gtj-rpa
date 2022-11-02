@@ -17,6 +17,11 @@ import org.openqa.selenium.safari.SafariDriver;
 
 import java.util.concurrent.TimeUnit;
 
+/**
+ * WebDriver网页访问动作模型
+ *
+ * @author sunsx
+ * */
 public abstract class WebDriverActionModel extends WebActionModel {
 
   /** selenium网络连接 */

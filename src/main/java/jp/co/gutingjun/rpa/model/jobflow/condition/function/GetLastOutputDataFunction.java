@@ -2,6 +2,11 @@ package jp.co.gutingjun.rpa.model.jobflow.condition.function;
 
 import jp.co.gutingjun.rpa.common.RPAConst;
 
+/**
+ * 获取上一节点输出数据函数
+ *
+ * @author sunsx
+ */
 public class GetLastOutputDataFunction extends FunctionModel {
   @Override
   public String getFunctionName() {

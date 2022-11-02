@@ -2,6 +2,11 @@ package jp.co.gutingjun.rpa.model.jobflow.condition.operator;
 
 import jp.co.gutingjun.rpa.model.jobflow.condition.LogicalConditionModel;
 
+/**
+ * 逻辑小于等于运算：左端小于等于右端即为真，反之为假
+ *
+ * @author sunsx
+ */
 public class LTE extends LogicalConditionModel {
   @Override
   public Operator getOperator() {

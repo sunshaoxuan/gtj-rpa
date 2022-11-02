@@ -4,6 +4,11 @@ import org.apache.commons.lang.StringUtils;
 
 import java.util.Stack;
 
+/**
+ * 四则运算计算器
+ *
+ * @author sunsx
+ */
 public class Calculator {
   public static double calculate(String formula) {
     Stack<String> numStack = new Stack<>();

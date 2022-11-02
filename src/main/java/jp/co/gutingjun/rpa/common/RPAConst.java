@@ -1,5 +1,10 @@
 package jp.co.gutingjun.rpa.common;
 
+/**
+ * 机器人常量类
+ *
+ * @author sunsx
+ * */
 public class RPAConst {
   /** 雪花ID生成器实例名 */
   public static final String SNOWFLAKE_INSTANCENAME = "init";

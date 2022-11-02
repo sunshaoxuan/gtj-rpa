@@ -2,6 +2,11 @@ package jp.co.gutingjun.rpa.model.jobflow.condition;
 
 import jp.co.gutingjun.rpa.model.jobflow.condition.operator.*;
 
+/**
+ * 条件工厂
+ *
+ * @author sunsx
+ */
 public class ConditionFactory {
   public static LogicalConditionModel createCondition(String conditionTag) {
     LogicalConditionModel rtn = null;

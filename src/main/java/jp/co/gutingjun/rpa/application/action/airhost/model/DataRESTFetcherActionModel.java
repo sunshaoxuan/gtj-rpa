@@ -1,4 +1,4 @@
-package jp.co.gutingjun.rpa.application.action.airhost;
+package jp.co.gutingjun.rpa.application.action.airhost.model;
 
 import com.gargoylesoftware.htmlunit.UnexpectedPage;
 import com.gargoylesoftware.htmlunit.WebResponse;
@@ -10,6 +10,7 @@ import jp.co.gutingjun.rpa.model.action.WebClientActionModel;
 import java.util.HashMap;
 import java.util.Map;
 
+/** AirHost动作模型：REST接口获取数据模型 */
 public abstract class DataRESTFetcherActionModel extends WebClientActionModel {
 
   private Long houseId;

@@ -2,6 +2,11 @@ package jp.co.gutingjun.rpa.model.strategy;
 
 import java.io.Serializable;
 
+/**
+ * 执行策略接口
+ *
+ * @author sunsx
+ */
 public interface IBotStrategy  extends Serializable {
     /**
      * 获取策略名称

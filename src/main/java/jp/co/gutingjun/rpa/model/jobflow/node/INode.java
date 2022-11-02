@@ -5,8 +5,12 @@ import jp.co.gutingjun.rpa.common.NodeTypeEnum;
 import java.io.Serializable;
 import java.util.Map;
 
-/** 环境变量载体 */
-public interface INode  extends Serializable {
+/**
+ * 节点接口
+ *
+ * @author sunsx
+ */
+public interface INode extends Serializable {
   /**
    * 获取节点ID
    *
@@ -36,14 +40,14 @@ public interface INode  extends Serializable {
   NodeTypeEnum getNoteType();
 
   /**
-   * 获得环境变更集合
+   * 获得环境变量
    *
    * @return
    */
   Map<String, Object> getContext();
 
   /**
-   * 设置环境变更集体
+   * 设置环境变量
    *
    * @param context
    */

@@ -8,6 +8,11 @@ import org.springframework.stereotype.Component;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * 通用页面访问动作
+ *
+ * @author sunsx
+ * */
 @Component
 public class AccessWebPageAction extends WebClientActionModel {
   @Override

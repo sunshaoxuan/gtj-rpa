@@ -3,6 +3,11 @@ package jp.co.gutingjun.rpa.common;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
+/**
+ * 错误处理方式枚举
+
+ * @author sunsx
+ * */
 public enum OnErrorHandleEnum {
   BREAK("break", "中断"),
   CONTINUE("continue", "继续"),

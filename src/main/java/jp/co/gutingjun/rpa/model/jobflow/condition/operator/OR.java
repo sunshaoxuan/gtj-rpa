@@ -5,8 +5,7 @@ import jp.co.gutingjun.rpa.model.jobflow.condition.LogicalConditionModel;
 /**
  * 逻辑或运算：左右两端逻辑值有一个为真即为真，全为假时值为假
  *
- * @author ssx
- * @created 2022-08-16
+ * @author sunsx
  */
 public class OR extends LogicalConditionModel {
   @Override

@@ -1,5 +1,6 @@
 package jp.co.gutingjun.rpa.inf;
 
+/** 用户服务接口 */
 public interface IUserService {
   /**
    * 创建用户
@@ -8,6 +9,7 @@ public interface IUserService {
    * @param email 电子邮件
    * @param password 密码
    * @param isAdmin 是否管理员
+   * @author sunsx
    */
   void createUser(String username, String email, String password, boolean isAdmin)
       throws RuntimeException;

@@ -5,6 +5,11 @@ import org.apache.commons.lang.StringUtils;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
+/**
+ * 网页访问动作模型
+ *
+ * @author sunsx
+ * */
 public abstract class WebActionModel extends ActionModel {
   /** 访问凭证 */
   private String accessToken;

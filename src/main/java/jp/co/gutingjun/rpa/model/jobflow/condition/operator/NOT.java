@@ -5,8 +5,7 @@ import jp.co.gutingjun.rpa.model.jobflow.condition.LogicalConditionModel;
 /**
  * 逻辑非运算：无右端判断，值为左端逻辑值的反
  *
- * @author ssx
- * @created 2022-08-16
+ * @author sunsx
  */
 public class NOT extends LogicalConditionModel {
   @Override

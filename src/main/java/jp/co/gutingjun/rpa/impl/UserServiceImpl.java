@@ -19,6 +19,11 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.UUID;
 
+/**
+ * 用户服务实现类
+ *
+ * @author sunsx
+ */
 @Service
 public class UserServiceImpl implements IUserService {
   @Autowired JavaMailSender mailSender;

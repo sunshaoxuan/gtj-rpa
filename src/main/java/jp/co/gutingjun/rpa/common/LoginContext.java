@@ -10,6 +10,11 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.annotation.PostConstruct;
 
+/**
+ * 登录上下文缓存
+ *
+ * @author sunsx
+ * */
 @Component
 @Slf4j
 public class LoginContext {

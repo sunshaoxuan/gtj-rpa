@@ -1,14 +1,19 @@
 package jp.co.gutingjun.rpa.application.action;
 
 import jp.co.gutingjun.rpa.common.PackageClassLoader;
-import jp.co.gutingjun.rpa.model.action.AbsoluteActionFetcher;
+import jp.co.gutingjun.rpa.model.action.AbsoluteActionFetcherModel;
 import jp.co.gutingjun.rpa.model.action.IAction;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BaseActionFetcher extends AbsoluteActionFetcher {
+/**
+ * 动作缓存
+ *
+ * @author sunsx
+ * */
+public class BaseActionFetcher extends AbsoluteActionFetcherModel {
   private final List<IAction> actionList = new ArrayList<IAction>();
 
   @Override

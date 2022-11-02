@@ -1,5 +1,10 @@
 package jp.co.gutingjun.rpa.model.jobflow.condition.function;
 
+/**
+ * 函数工厂
+ *
+ * @author sunsx
+ * */
 public class FunctionFactory {
   public static FunctionModel CreateFunction(String functionStr) {
     FunctionModel newFunc = null;

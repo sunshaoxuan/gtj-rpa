@@ -1,6 +1,7 @@
 package jp.co.gutingjun.rpa.application.action.airhost;
 
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import jp.co.gutingjun.rpa.application.action.airhost.login.UserPasswordLoginAction;
 import jp.co.gutingjun.rpa.common.RPAConst;
 import org.junit.jupiter.api.Test;
 import org.wildfly.common.Assert;

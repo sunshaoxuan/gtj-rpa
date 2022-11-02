@@ -1,5 +1,10 @@
 package jp.co.gutingjun.rpa.model.event;
 
+/**
+ * 事件基类
+ *
+ * @author sunsx
+ */
 public class BaseEvent {
   private final EventTypeEnum eventType;
 

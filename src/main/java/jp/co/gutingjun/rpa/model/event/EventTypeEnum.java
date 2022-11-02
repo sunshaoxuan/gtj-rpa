@@ -1,6 +1,10 @@
 package jp.co.gutingjun.rpa.model.event;
 
-/** 事件类型 */
+/**
+ * 事件类型
+ *
+ * @author sunsx
+ * */
 public enum EventTypeEnum {
   /** 等待 */
   WAIT,

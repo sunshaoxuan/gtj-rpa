@@ -13,7 +13,11 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Date;
 
-/** 周期策略 */
+/**
+ * 周期策略
+ *
+ * @author sunsx
+ * */
 @Data
 @NoArgsConstructor
 public class CycleStrategy implements IBotStrategy {

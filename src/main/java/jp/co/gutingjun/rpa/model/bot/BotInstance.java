@@ -14,6 +14,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
+/**
+ * 机器人进程
+ *
+ * @author sunsx
+ */
 @Slf4j
 public class BotInstance extends BotModel implements Callable<Long>, IContainer {
   private Long instanceId = null;

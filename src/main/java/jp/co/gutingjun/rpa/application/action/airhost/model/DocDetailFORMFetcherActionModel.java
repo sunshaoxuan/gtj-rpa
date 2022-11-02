@@ -1,4 +1,4 @@
-package jp.co.gutingjun.rpa.application.action.airhost;
+package jp.co.gutingjun.rpa.application.action.airhost.model;
 
 import com.gargoylesoftware.htmlunit.html.*;
 import jp.co.gutingjun.common.util.MapUtils;
@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+/** AirHost动作模型：表单数据获取模型 */
 public abstract class DocDetailFORMFetcherActionModel extends WebClientActionModel {
   /** 房源ID */
   private Long houseId;

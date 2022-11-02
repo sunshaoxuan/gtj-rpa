@@ -1,10 +1,11 @@
-package jp.co.gutingjun.rpa.application.action.gtj;
+package jp.co.gutingjun.rpa.application.action.gtj.service;
 
 import com.gargoylesoftware.htmlunit.HttpMethod;
 import com.gargoylesoftware.htmlunit.UnexpectedPage;
 import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.WebResponse;
 import jp.co.gutingjun.common.util.JsonUtils;
+import jp.co.gutingjun.rpa.application.action.gtj.login.UserPassCodeLoginAction;
 import jp.co.gutingjun.rpa.common.RPAConst;
 import jp.co.gutingjun.rpa.model.action.WebClientActionModel;
 import org.apache.commons.lang.StringUtils;
@@ -14,6 +15,11 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.Map;
 
+/**
+ * 谷町君旅馆动作：REST方式调用服务动作
+ *
+ * @author sunsx
+ * */
 @Component
 public class PostRestServiceAction extends WebClientActionModel {
   private String token;

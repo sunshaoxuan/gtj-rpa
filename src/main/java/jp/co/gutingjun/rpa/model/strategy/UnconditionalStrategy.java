@@ -2,7 +2,11 @@ package jp.co.gutingjun.rpa.model.strategy;
 
 import org.apache.commons.lang.StringUtils;
 
-/** 无条件通过策略 */
+/**
+ * 无条件通过策略
+ *
+ * @author sunsx
+ * */
 public class UnconditionalStrategy implements IBotStrategy {
   /** 策略名称 */
   private String name;

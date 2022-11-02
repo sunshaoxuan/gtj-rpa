@@ -1,6 +1,8 @@
 package jp.co.gutingjun.rpa.application.action.gtj;
 
 import jp.co.gutingjun.common.util.JsonUtils;
+import jp.co.gutingjun.rpa.application.action.gtj.login.UserPassCodeLoginAction;
+import jp.co.gutingjun.rpa.application.action.gtj.service.PostRestServiceAction;
 import jp.co.gutingjun.rpa.common.RPAConst;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;

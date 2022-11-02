@@ -8,6 +8,11 @@ import jp.co.gutingjun.rpa.model.jobflow.node.JobActionNode;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * 动作模型
+ *
+ * @author sunsx
+ * */
 public abstract class ActionModel implements IAction, IContainer<JobActionNode> {
   private final Long id;
 

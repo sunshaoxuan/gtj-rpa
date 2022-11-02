@@ -2,6 +2,11 @@ package jp.co.gutingjun.rpa.model.jobflow.condition.function;
 
 import jp.co.gutingjun.rpa.model.action.IAction;
 
+/**
+ * 输入数据函数
+ *
+ * @author sunsx
+ */
 public class InputDataFunction extends FunctionModel {
   @Override
   public String getFunctionName() {

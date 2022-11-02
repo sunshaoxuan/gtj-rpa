@@ -1,4 +1,4 @@
-package jp.co.gutingjun.rpa.application.action.airhost;
+package jp.co.gutingjun.rpa.application.action.airhost.hotel;
 
 import jp.co.gutingjun.common.util.MapUtils;
 import jp.co.gutingjun.rpa.common.CommonUtils;
@@ -8,6 +8,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * AirHost动作：房源数据获取动作
+ * @author sunsx
+ * */
 public class EntireHotelInfoFetcherAction extends HotelFetcherAction {
   /** 启用访问休眠机制时，最大休眠秒数</br> （休眠时间随机生成，不超过最大休眠秒数） */
   private int maxSleepSeconds = 1;

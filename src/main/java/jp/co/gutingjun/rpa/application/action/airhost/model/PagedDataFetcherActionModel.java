@@ -1,4 +1,4 @@
-package jp.co.gutingjun.rpa.application.action.airhost;
+package jp.co.gutingjun.rpa.application.action.airhost.model;
 
 import com.gargoylesoftware.htmlunit.UnexpectedPage;
 import com.gargoylesoftware.htmlunit.WebResponse;
@@ -13,6 +13,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * AirHost动作模型：分页数据获取模型
+ *
+ * @author sunsx
+ */
 public abstract class PagedDataFetcherActionModel extends WebClientActionModel {
   private Long houseId;
   /** 是否启用访问休眠机制，以避免发生高频访问 */

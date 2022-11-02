@@ -4,7 +4,11 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
-/** 频率类型枚举 */
+/**
+ * 频率类型枚举
+ *
+ * @author sunsx
+ * */
 public enum FrequencyTypeEnum implements Serializable {
   /** 按小时 */
   HOUR("HOUR", "小时"),
@@ -17,22 +21,6 @@ public enum FrequencyTypeEnum implements Serializable {
 
   private String code;
   private String name;
-
-  public String getCode() {
-    return code;
-  }
-
-  public void setCode(String code) {
-    this.code = code;
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public void setName(String name) {
-    this.name = name;
-  }
 
   FrequencyTypeEnum(String code, String name) {
     this.code = code;
@@ -50,5 +38,21 @@ public enum FrequencyTypeEnum implements Serializable {
     return Arrays.stream(FrequencyTypeEnum.values())
         .collect(Collectors.toList())
         .toArray(new FrequencyTypeEnum[0]);
+  }
+
+  public String getCode() {
+    return code;
+  }
+
+  public void setCode(String code) {
+    this.code = code;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
   }
 }

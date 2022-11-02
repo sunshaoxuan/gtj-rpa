@@ -6,6 +6,11 @@ import jp.co.gutingjun.rpa.model.jobflow.condition.LogicalConditionModel;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * 基本连线节点
+ *
+ * @author sunsx
+ */
 public class BaseLinkNode extends LinkNodeModel {
   ICondition ruleCondition = null;
 

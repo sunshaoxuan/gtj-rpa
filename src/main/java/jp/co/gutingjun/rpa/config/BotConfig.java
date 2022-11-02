@@ -11,6 +11,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
+/**
+ * 机器人平台基础配置
+ *
+ * @author sunsx
+ */
 @Slf4j
 public class BotConfig {
   /** TOKEN过期小时数 */
@@ -128,5 +133,9 @@ public class BotConfig {
       k += 2;
     }
     return byteArray;
+  }
+
+  public static void loadDefaultBots(){
+
   }
 }

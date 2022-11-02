@@ -6,6 +6,11 @@ import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.*;
 import jp.co.gutingjun.rpa.common.RPAConst;
 
+/**
+ * WebClient网页动作访问模型
+ *
+ * @author sunsx
+ * */
 public abstract class WebClientActionModel extends WebActionModel {
 
   /** 网络连接 */

@@ -4,7 +4,11 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
-/** 周期类型枚举 */
+/**
+ * 周期类型枚举
+ *
+ * @author sunsx
+ */
 public enum CycleTypeEnum implements Serializable {
   /** 按月 */
   MONTH("MONTH", "月"),
@@ -15,6 +19,24 @@ public enum CycleTypeEnum implements Serializable {
 
   private String code;
   private String name;
+
+  CycleTypeEnum(String code, String name) {
+    this.code = code;
+    this.name = name;
+  }
+
+  public static CycleTypeEnum getCycleTypeEnum(String code) {
+    return Arrays.stream(CycleTypeEnum.values())
+        .filter(cycleTypeEnum -> cycleTypeEnum.getCode().equals(code))
+        .findFirst()
+        .get();
+  }
+
+  public static CycleTypeEnum[] getAllEnum() {
+    return Arrays.stream(CycleTypeEnum.values())
+        .collect(Collectors.toList())
+        .toArray(new CycleTypeEnum[0]);
+  }
 
   public String getCode() {
     return code;
@@ -30,23 +52,5 @@ public enum CycleTypeEnum implements Serializable {
 
   public void setName(String name) {
     this.name = name;
-  }
-
-  CycleTypeEnum(String code, String name) {
-    this.code = code;
-    this.name = name;
-  }
-
-  public static CycleTypeEnum getCycleTypeEnum(String code) {
-    return Arrays.stream(CycleTypeEnum.values())
-            .filter(cycleTypeEnum -> cycleTypeEnum.getCode().equals(code))
-            .findFirst()
-            .get();
-  }
-
-  public static CycleTypeEnum[] getAllEnum() {
-    return Arrays.stream(CycleTypeEnum.values())
-            .collect(Collectors.toList())
-            .toArray(new CycleTypeEnum[0]);
   }
 }

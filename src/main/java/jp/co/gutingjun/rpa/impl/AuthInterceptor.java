@@ -9,6 +9,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Objects;
 
+/**
+ * 用户验证拦截器
+ *
+ * @author sunsx
+ * */
 public class AuthInterceptor implements HandlerInterceptor {
   @Autowired private RedisService redisService;
 

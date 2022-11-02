@@ -10,6 +10,11 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Redis通用服务
+ *
+ * @author sunsx
+ * */
 @Service
 public class RedisService {
   @Resource private RedisTemplate<String, Object> redisTemplate;

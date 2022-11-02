@@ -5,6 +5,11 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
+/**
+ * 格式化日志数据
+ *
+ * @author sunsx
+ */
 @Data
 @Builder
 public class LogData {

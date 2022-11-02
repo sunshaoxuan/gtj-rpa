@@ -1,4 +1,4 @@
-package jp.co.gutingjun.rpa.application.action.gtj;
+package jp.co.gutingjun.rpa.application.action.gtj.login;
 
 import com.gargoylesoftware.htmlunit.HttpMethod;
 import com.gargoylesoftware.htmlunit.UnexpectedPage;
@@ -15,6 +15,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 谷町君旅馆动作：用户名及验证码登录动作
+ *
+ * @author sunsx
+ * */
 @Component
 public class UserPassCodeLoginAction extends WebClientActionModel {
   public UserPassCodeLoginAction() {

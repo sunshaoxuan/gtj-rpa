@@ -3,6 +3,11 @@ package jp.co.gutingjun.rpa.model.action;
 import java.io.Serializable;
 import java.util.Map;
 
+/**
+ * 机器人动作接口
+ *
+ * @author sunsx
+ * */
 public interface IAction extends Serializable {
   /** 获取工作ID */
   Long getId();

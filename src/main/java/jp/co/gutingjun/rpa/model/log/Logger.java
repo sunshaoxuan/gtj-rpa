@@ -5,6 +5,11 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 公共日志服务
+ *
+ * @author sunsx
+ * */
 @Slf4j
 public class Logger {
   /** 消息 */

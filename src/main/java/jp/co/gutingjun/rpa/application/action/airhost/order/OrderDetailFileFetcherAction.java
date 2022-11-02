@@ -1,4 +1,4 @@
-package jp.co.gutingjun.rpa.application.action.airhost;
+package jp.co.gutingjun.rpa.application.action.airhost.order;
 
 import com.gargoylesoftware.htmlunit.TextPage;
 import com.gargoylesoftware.htmlunit.WebResponse;
@@ -14,6 +14,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * AirHost动作：订单明细页获取订单详细数据动作
+ *
+ * @author sunsx
+ * */
 public class OrderDetailFileFetcherAction extends WebClientActionModel {
   private LocalDate beginDate;
   private LocalDate endDate;

@@ -8,6 +8,11 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.Map;
 
+/**
+ * 机器人接口
+ *
+ * @author sunsx
+ */
 public interface IBot extends Serializable {
   /**
    * 获取策略集合

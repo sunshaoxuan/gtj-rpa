@@ -1,0 +1,106 @@
+{
+  "bot": {
+    "name": "AirHost订单同步RPA",
+    "classType": "",
+    "strategies": [
+      {
+        "type": "UnconditionalStrategy",
+        "name": "无条件执行一次"
+      }
+    ],
+    "jobs": [
+      {
+        "id": "LogInAirHost",
+        "showName": "登录",
+        "type": "UserPasswordLoginAction",
+        "error": "break",
+        "context": {
+          "url": "https://cloud.airhost.co/accounts/sign_in",
+          "loadPageAfterLogin": "https://cloud.airhost.co/en/dashboard",
+          "username": "$AIRHOST_MANAGE_USERNAME$",
+          "password": "$AIRHOST_MANAGE_PASSWORD$"
+        }
+      },
+      {
+        "id": "FetchOrderData",
+        "showName": "获取订单数据",
+        "type": "OrderFetcherAction",
+        "error": "break",
+        "context": {
+          "beginDate": "$BEGIN_DATE$",
+          "endDate": "$END_DATE$"
+        }
+      },
+      {
+        "id": "LoginGTJ",
+        "showName": "登录谷町君旅馆管理系统",
+        "type": "UserPassCodeLoginAction",
+        "error": "break",
+        "context": {
+          "username": "$GTJ_MANAGE_USERNAME$",
+          "password": "$GTJ_MANAGE_PASSCODE$"
+        }
+      },
+      {
+        "id": "WriteData",
+        "showName": "将数据写入谷町君",
+        "type": "PostRestServiceAction",
+        "error": "break",
+        "context": {
+          "url": "https://test.admin.gutingjun.com/api/hotel/pms/page",
+          "inputData": "$GETOUTPUTDATA(JobActionNode[FetchHouseData])$"
+        }
+      }
+    ],
+    "linkers": [
+      {
+        "id": "Entry",
+        "from": null,
+        "to": "LogInAirHost",
+        "showName": "无条件开始",
+        "rule": {
+          "EQ": {
+            "left": true,
+            "right": true
+          }
+        }
+      },
+      {
+        "id": "LogInAirHostSuccess",
+        "from": "LogInAirHost",
+        "to": "FetchOrderData",
+        "showName": "登录AirHost成功后获取订单数据",
+        "rule": {
+          "EQ": {
+            "left": true,
+            "right": "$GETLASTOUTPUTDATA$"
+          }
+        }
+      },
+      {
+        "id": "AirHostDataFetched",
+        "from": "FetchHouseData",
+        "to": "LoginGTJ",
+        "showName": "取房源数据后登入谷町君",
+        "rule": {
+          "EQ": {
+            "left": true,
+            "right": "$GETLASTEXECUTERESULT$"
+          }
+        }
+      },
+      {
+        "id": "LoginGTJSuccess",
+        "from": "LoginGTJ",
+        "to": "WriteData",
+        "showName": "登录谷町君后写入数据",
+        "rule": {
+          "EQ": {
+            "left": true,
+            "right": "$GETLASTOUTPUTDATA$"
+          }
+        }
+      }
+    ]
+  }
+}

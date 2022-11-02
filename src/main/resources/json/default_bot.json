@@ -1,0 +1,14 @@
+{
+  "autoreg": [
+    {
+      "name": "循环读订单",
+      "template": "cycle_order_fetch_bot.json",
+      "context": {
+        "airhost_manage_username": "sun.shaoxuan@51fanxing.co.jp",
+        "airhost_manage_password": "1qaz@WSX",
+        "gtj_manage_username": "sun.shaoxuan@51fanxing.co.jp",
+        "gtj_manage_passcode": "2981"
+      }
+    }
+  ]
+}

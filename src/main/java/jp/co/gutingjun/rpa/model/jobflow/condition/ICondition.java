@@ -2,6 +2,11 @@ package jp.co.gutingjun.rpa.model.jobflow.condition;
 
 import java.io.Serializable;
 
+/**
+ * 条件接口
+ *
+ * @author sunsx
+ */
 public interface ICondition extends Serializable {
   Operator getOperator();
 

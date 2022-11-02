@@ -17,6 +17,11 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
+/**
+ * 工作节点模型
+ *
+ * @author sunsx
+ */
 @Slf4j
 public abstract class JobNodeModel extends TreeNode<LinkNodeModel>
     implements IJobNode, IContainer<BotInstance> {

@@ -3,7 +3,12 @@ package jp.co.gutingjun.rpa.model.action;
 import java.io.Serializable;
 import java.util.List;
 
-public abstract class AbsoluteActionFetcher implements Serializable {
+/**
+ * 动作缓存模型
+ *
+ * @author sunsx
+ * */
+public abstract class AbsoluteActionFetcherModel implements Serializable {
   protected abstract List<IAction> getActionList();
 
   /**

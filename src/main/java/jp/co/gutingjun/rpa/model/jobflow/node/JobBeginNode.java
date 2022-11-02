@@ -2,6 +2,11 @@ package jp.co.gutingjun.rpa.model.jobflow.node;
 
 import jp.co.gutingjun.rpa.common.NodeTypeEnum;
 
+/**
+ * 开始节点
+ *
+ * @author sunsx
+ */
 public class JobBeginNode extends JobNodeModel {
   public JobBeginNode() {
     setTag(null);

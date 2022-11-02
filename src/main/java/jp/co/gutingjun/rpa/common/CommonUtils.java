@@ -5,6 +5,11 @@ import jp.co.gutingjun.common.util.SpringBeanUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomUtils;
 
+/**
+ * 一般工具
+ *
+ * @author sunsx
+ * */
 @Slf4j
 public class CommonUtils {
   public static Long getNextID() {

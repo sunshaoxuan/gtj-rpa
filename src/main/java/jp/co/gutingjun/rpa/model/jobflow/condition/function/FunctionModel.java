@@ -7,6 +7,11 @@ import org.apache.commons.lang.StringUtils;
 import java.io.Serializable;
 import java.util.Map;
 
+/**
+ * 函数模型
+ *
+ * @author sunsx
+ */
 public abstract class FunctionModel implements IContainer<LogicalConditionModel>, Serializable {
   private Object inputData;
 

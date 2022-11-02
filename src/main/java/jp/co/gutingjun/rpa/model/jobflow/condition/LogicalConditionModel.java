@@ -14,6 +14,11 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * 条件模型
+ *
+ * @author sunsx
+ */
 public abstract class LogicalConditionModel implements ICondition, IContainer<LinkNodeModel> {
   static Stack<String[]> functionStack = new Stack();
   private static Map<String, String> functionDefine = null;

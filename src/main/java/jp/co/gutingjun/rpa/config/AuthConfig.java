@@ -6,6 +6,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
+/**
+ * 登录验证配置适配器
+ *
+ * @author sunsx
+ */
 @Configuration
 public class AuthConfig extends WebMvcConfigurerAdapter {
   @Bean

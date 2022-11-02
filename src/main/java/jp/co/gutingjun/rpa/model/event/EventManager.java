@@ -11,7 +11,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 
-/** 同异步事件管理器 */
+/**
+ * 同异步事件管理器
+ *
+ * @author sunsx
+ * */
 @Slf4j
 public class EventManager implements Serializable {
   // 事件类型与事件处理器列表的映射关系

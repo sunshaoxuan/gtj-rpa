@@ -4,7 +4,7 @@ import jp.co.gutingjun.common.util.MapUtils;
 import jp.co.gutingjun.common.util.ObjectUtils;
 import jp.co.gutingjun.rpa.application.action.BaseActionFetcher;
 import jp.co.gutingjun.rpa.common.*;
-import jp.co.gutingjun.rpa.model.action.AbsoluteActionFetcher;
+import jp.co.gutingjun.rpa.model.action.AbsoluteActionFetcherModel;
 import jp.co.gutingjun.rpa.model.action.IAction;
 import jp.co.gutingjun.rpa.model.event.BaseEvent;
 import jp.co.gutingjun.rpa.model.event.EventManager;
@@ -27,8 +27,7 @@ import java.util.stream.Collectors;
 /**
  * 机器人模型
  *
- * @author ssx
- * @since 2022/08/01
+ * @author sunsx
  */
 @Slf4j
 @Data
@@ -56,14 +55,14 @@ public abstract class BotModel extends EventManager implements IBot {
 
   private IBotStrategy[] botStrategy;
   /** 动作查找器 */
-  private AbsoluteActionFetcher actionFetcher;
+  private AbsoluteActionFetcherModel actionFetcher;
 
   /** 初始化机器人模型 */
   public BotModel() {
     setId(CommonUtils.getNextID());
   }
 
-  public AbsoluteActionFetcher getActionFetcher() {
+  public AbsoluteActionFetcherModel getActionFetcher() {
     if (actionFetcher == null) {
       actionFetcher = new BaseActionFetcher();
     }
@@ -92,7 +91,7 @@ public abstract class BotModel extends EventManager implements IBot {
   }
 
   private void setStrategyBySetting(Map<String, Object> botSettings) {
-    Map<String, Object> settings = (Map<String, Object>) botSettings.get("bot");
+    Map<String, Object> settings = (Map<String, Object>) botSettings.get("json/bot");
     if (settings.containsKey("strategies") && settings.get("strategies") instanceof List) {
       ((List) settings.get("strategies"))
           .stream()
@@ -166,7 +165,7 @@ public abstract class BotModel extends EventManager implements IBot {
     JobNodeModel currentNode;
     List<JobNodeModel> addedJobNodes = new ArrayList<>();
     List<String> fetchedJobNodes = new ArrayList<>();
-    Map<String, Object> settings = (Map<String, Object>) botSettings.get("bot");
+    Map<String, Object> settings = (Map<String, Object>) botSettings.get("json/bot");
     if (settings.containsKey("jobs") && settings.containsKey("linkers")) {
       // 有任务节点及连线，递归建树
       // 创建开始节点
@@ -261,7 +260,7 @@ public abstract class BotModel extends EventManager implements IBot {
                               newJobNode.setShowName((String) job.get("showName"));
                               newJobNode.setParent(linkNode);
                               newJobNode.setTag((String) job.get("id"));
-                              AbsoluteActionFetcher actionFetcher = getActionFetcher();
+                              AbsoluteActionFetcherModel actionFetcher = getActionFetcher();
                               IAction newAction = actionFetcher.getAction((String) job.get("type"));
                               Map<String, Object> contextMap =
                                   (Map<String, Object>) job.get("context");
@@ -304,8 +303,8 @@ public abstract class BotModel extends EventManager implements IBot {
   }
 
   private void setBasePropertyBySetting(Map<String, Object> botSettings) {
-    if (botSettings.containsKey("bot")) {
-      ((Map<String, Object>) botSettings.get("bot"))
+    if (botSettings.containsKey("json/bot")) {
+      ((Map<String, Object>) botSettings.get("json/bot"))
           .forEach((key, value) -> ObjectUtils.setFieldValue(this, key, value));
     }
 

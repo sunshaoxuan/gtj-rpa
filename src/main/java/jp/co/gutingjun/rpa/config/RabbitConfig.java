@@ -4,6 +4,11 @@ import org.springframework.amqp.core.Queue;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * 消息队列服务初始化配置
+ *
+ * @author sunsx
+ */
 @Configuration
 public class RabbitConfig {
   /** 机器人运行队列 */

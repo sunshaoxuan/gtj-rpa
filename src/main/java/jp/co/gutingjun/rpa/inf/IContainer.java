@@ -6,6 +6,7 @@ import java.util.Map;
  * 容器
  *
  * @param <T> 父容器类型
+ * @author sunsx
  */
 public interface IContainer<T extends IContainer> {
   /** 获取当前对象的容器实例 */

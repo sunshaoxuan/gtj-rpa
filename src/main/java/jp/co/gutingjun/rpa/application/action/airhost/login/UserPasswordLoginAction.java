@@ -1,10 +1,11 @@
-package jp.co.gutingjun.rpa.application.action.airhost;
+package jp.co.gutingjun.rpa.application.action.airhost.login;
 
 import com.gargoylesoftware.htmlunit.html.*;
 import jp.co.gutingjun.rpa.common.RPAConst;
 import jp.co.gutingjun.rpa.model.action.WebClientActionModel;
 import org.springframework.stereotype.Component;
 
+/** AirHost动作：用户登录动作 */
 @Component
 public class UserPasswordLoginAction extends WebClientActionModel {
 

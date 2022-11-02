@@ -1,5 +1,10 @@
 package jp.co.gutingjun.rpa.model.jobflow.condition.function;
 
+/**
+ * 是否为空函数
+ *
+ * @author sunsx
+ */
 public class IsNullFunction extends FunctionModel {
   @Override
   public String getFunctionName() {

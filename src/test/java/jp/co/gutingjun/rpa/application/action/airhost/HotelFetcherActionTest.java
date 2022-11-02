@@ -1,5 +1,7 @@
 package jp.co.gutingjun.rpa.application.action.airhost;
 
+import jp.co.gutingjun.rpa.application.action.airhost.hotel.HotelFetcherAction;
+import jp.co.gutingjun.rpa.application.action.airhost.login.UserPasswordLoginAction;
 import jp.co.gutingjun.rpa.common.RPAConst;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
