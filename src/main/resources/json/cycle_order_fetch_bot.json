@@ -4,8 +4,16 @@
     "classType": "",
     "strategies": [
       {
-        "type": "UnconditionalStrategy",
-        "name": "无条件执行一次"
+        "type": "CycleStrategy",
+        "name": "每小时执行一次，连续10年",
+        "cycleType": "DAY",
+        "cycleInteval": 1,
+        "frequencyType": "HOUR",
+        "cycleBeginTime": "2022-09-15 00:00:00",
+        "cycleEndTime": "2032-09-14 23:59:59",
+        "startTimeInADay": "00:00:00",
+        "cycleInADay": 1,
+        "timeInCycle": "99,01"
       }
     ],
     "jobs": [
@@ -47,8 +55,8 @@
         "type": "PostRestServiceAction",
         "error": "break",
         "context": {
-          "url": "https://test.admin.gutingjun.com/api/hotel/pms/page",
-          "inputData": "$GETOUTPUTDATA(JobActionNode[FetchHouseData])$"
+          "url": "https://test.admin.gutingjun.com/api/hotel/pms/dataexchange/orderimport",
+          "inputData": "$GETOUTPUTDATA(JobActionNode[FetchOrderData])$"
         }
       }
     ],
@@ -79,7 +87,7 @@
       },
       {
         "id": "AirHostDataFetched",
-        "from": "FetchHouseData",
+        "from": "FetchOrderData",
         "to": "LoginGTJ",
         "showName": "取房源数据后登入谷町君",
         "rule": {

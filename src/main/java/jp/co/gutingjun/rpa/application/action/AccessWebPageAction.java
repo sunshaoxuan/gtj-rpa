@@ -12,7 +12,7 @@ import java.util.Map;
  * 通用页面访问动作
  *
  * @author sunsx
- * */
+ */
 @Component
 public class AccessWebPageAction extends WebClientActionModel {
   @Override
@@ -22,7 +22,6 @@ public class AccessWebPageAction extends WebClientActionModel {
 
   @Override
   protected Object doAction() {
-    String result = null;
     try {
       HtmlPage page = getWebClient().getPage((String) getContext().get(RPAConst.URL));
       getContext().put(RPAConst.WEBCLIENT, getWebClient());
@@ -30,7 +29,7 @@ public class AccessWebPageAction extends WebClientActionModel {
     } catch (Exception ex) {
       throw new RuntimeException(ex);
     }
-    return result;
+    return true;
   }
 
   @Override

@@ -4,7 +4,7 @@ package jp.co.gutingjun.rpa.common;
  * 机器人常量类
  *
  * @author sunsx
- * */
+ */
 public class RPAConst {
   /** 雪花ID生成器实例名 */
   public static final String SNOWFLAKE_INSTANCENAME = "init";
@@ -62,6 +62,8 @@ public class RPAConst {
   public static final String TAG_HOUSEDATA = "houses";
   /** 房间标签 */
   public static final String TAG_ROOMID = "$ROOMID$";
+  /** 房间预订日历标签 */
+  public static final String TAG_HOUSECALENDARID = "$HOUSECALENDARID$";
   /** 订单标签 */
   public static final String TAG_ORDERID = "$ORDERID$";
   /** selenium虚拟网络客户端 */

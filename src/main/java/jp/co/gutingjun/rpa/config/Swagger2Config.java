@@ -1,8 +1,5 @@
 package jp.co.gutingjun.rpa.config;
 
-import com.google.common.base.Function;
-import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -16,6 +13,9 @@ import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 import static com.google.common.collect.Lists.newArrayList;
 
@@ -23,73 +23,70 @@ import static com.google.common.collect.Lists.newArrayList;
  * describe:
  *
  * @author Jesse
- * @date 2018/12/07
  */
 @EnableSwagger2
 @Configuration
 @Profile("sit")
 public class Swagger2Config {
-    private List<ApiKey> securitySchemes() {
-        return newArrayList(new ApiKey("Authorization", "Authorization", "header"));
-    }
+  public static Predicate<RequestHandler> basePackage(final String basePackage) {
+    return input -> declaringClass(input).map(handlerPackage(basePackage)).orElse(true);
+  }
 
-    private List<SecurityContext> securityContexts() {
-        return newArrayList(
-                SecurityContext.builder()
-                        .securityReferences(defaultAuth())
-                        .forPaths(PathSelectors.regex("^(?!auth).*$"))
-                        .build());
-    }
+  private static Function<Class<?>, Boolean> handlerPackage(final String basePackage) {
+    return input -> {
+      // 循环判断匹配
+      for (String strPackage : basePackage.split(";")) {
+        boolean isMatch = input.getPackage().getName().startsWith(strPackage);
+        if (isMatch) {
+          return true;
+        }
+      }
+      return false;
+    };
+  }
 
-    List<SecurityReference> defaultAuth() {
-        AuthorizationScope authorizationScope = new AuthorizationScope("global", "accessEverything");
-        AuthorizationScope[] authorizationScopes = new AuthorizationScope[1];
-        authorizationScopes[0] = authorizationScope;
-        return newArrayList(new SecurityReference("Authorization", authorizationScopes));
-    }
+  private static Optional<? extends Class<?>> declaringClass(RequestHandler input) {
+    return Optional.ofNullable(input.declaringClass());
+  }
 
-    @Bean
-    public Docket createRestApi() {
-        return new Docket(DocumentationType.SWAGGER_2)
-                .apiInfo(apiInfo())
-                .select()
-                .apis(
-                        basePackage(
-                                "jp.co.gutingjun.rpa.rest;"))
-                .paths(PathSelectors.any())
-                .build()
-                .securitySchemes(securitySchemes())
-                .securityContexts(securityContexts());
-    }
+  private List<SecurityScheme> securitySchemes() {
+    return newArrayList(new ApiKey("Authorization", "Authorization", "header"));
+  }
 
-    public static Predicate<RequestHandler> basePackage(final String basePackage) {
-        return input -> declaringClass(input).transform(handlerPackage(basePackage)).or(true);
-    }
+  private List<SecurityContext> securityContexts() {
+    return newArrayList(
+        SecurityContext.builder()
+            .securityReferences(defaultAuth())
+            .forPaths(PathSelectors.regex("^(?!auth).*$"))
+            .build());
+  }
 
-    private static Function<Class<?>, Boolean> handlerPackage(final String basePackage) {
-        return input -> {
-            // 循环判断匹配
-            for (String strPackage : basePackage.split(";")) {
-                boolean isMatch = input.getPackage().getName().startsWith(strPackage);
-                if (isMatch) {
-                    return true;
-                }
-            }
-            return false;
-        };
-    }
+  List<SecurityReference> defaultAuth() {
+    AuthorizationScope authorizationScope = new AuthorizationScope("global", "accessEverything");
+    AuthorizationScope[] authorizationScopes = new AuthorizationScope[1];
+    authorizationScopes[0] = authorizationScope;
+    return newArrayList(new SecurityReference("Authorization", authorizationScopes));
+  }
 
-    private static Optional<? extends Class<?>> declaringClass(RequestHandler input) {
-        return Optional.fromNullable(input.declaringClass());
-    }
+  @Bean
+  public Docket createRestApi() {
+    return new Docket(DocumentationType.SWAGGER_2)
+        .apiInfo(apiInfo())
+        .select()
+        .apis(basePackage("jp.co.gutingjun.rpa.rest;"))
+        .paths(PathSelectors.any())
+        .build()
+        .securitySchemes(securitySchemes())
+        .securityContexts(securityContexts());
+  }
 
-    private ApiInfo apiInfo() {
-        return new ApiInfoBuilder()
-                .title("rpa文档")
-                .description("rpa接口说明文档")
-                .termsOfServiceUrl("")
-                .contact(new Contact("Jesse", "shengni1988@gmail.com", "shengni1988@gmail.com"))
-                .version("1.0")
-                .build();
-    }
+  private ApiInfo apiInfo() {
+    return new ApiInfoBuilder()
+        .title("rpa文档")
+        .description("rpa接口说明文档")
+        .termsOfServiceUrl("")
+        .contact(new Contact("Jesse", "shengni1988@gmail.com", "shengni1988@gmail.com"))
+        .version("1.0")
+        .build();
+  }
 }
