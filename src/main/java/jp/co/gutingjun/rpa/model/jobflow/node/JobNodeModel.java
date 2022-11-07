@@ -3,6 +3,7 @@ package jp.co.gutingjun.rpa.model.jobflow.node;
 import jp.co.gutingjun.common.pms.TreeNode;
 import jp.co.gutingjun.rpa.common.CommonUtils;
 import jp.co.gutingjun.rpa.common.NodeTypeEnum;
+import jp.co.gutingjun.rpa.common.OnErrorHandleEnum;
 import jp.co.gutingjun.rpa.common.RPAConst;
 import jp.co.gutingjun.rpa.exception.InvalidJobNodeException;
 import jp.co.gutingjun.rpa.inf.IContainer;
@@ -94,34 +95,43 @@ public abstract class JobNodeModel extends TreeNode<LinkNodeModel>
 
   /** 执行工作 */
   public void execute() {
-    log.info("    [" + getShowName() + "] 节点开始");
-    // 执行本节点所有动作
-    Arrays.stream(getActions())
-        .forEach(
-            action -> {
-              log.info("      [" + action.getClass().getSimpleName() + "] 动作开始");
-              // 处理节点间传递的输入数据
-              dealInputData(action);
-              log.info("      [" + action.getClass().getSimpleName() + "] 动作处理节点间传递输入数据");
+    try {
+      log.info("    [" + getShowName() + "] 节点开始");
+      // 执行本节点所有动作
+      Arrays.stream(getActions())
+          .forEach(
+              action -> {
+                log.info("      [" + action.getClass().getSimpleName() + "] 动作开始");
+                // 处理节点间传递的输入数据
+                dealInputData(action);
+                log.info("      [" + action.getClass().getSimpleName() + "] 动作处理节点间传递输入数据");
 
-              // 输出数据采集
-              log.info("      [" + action.getClass().getSimpleName() + "] 动作执行");
-              Object returnValue = action.execute();
+                // 输出数据采集
+                log.info("      [" + action.getClass().getSimpleName() + "] 动作执行");
+                Object returnValue = action.execute();
 
-              log.info("      [" + action.getClass().getSimpleName() + "] 动作处理顶层容器环境变量");
-              getTopContainer().getContext().put(RPAConst.LASTEXECUTERESULT, returnValue);
-              getTopContainer().getContext().put(RPAConst.LASTOUTPUTDATA, action.getOutputData());
-              getTopContainer()
-                  .getContext()
-                  .put(
-                      this.getClass().getSimpleName()
-                          + "["
-                          + this.getTag()
-                          + "]."
-                          + action.getClass().getSimpleName(),
-                      action.getOutputData());
-            });
-    log.info("    [" + getShowName() + "] 节点结束");
+                log.info("      [" + action.getClass().getSimpleName() + "] 动作处理顶层容器环境变量");
+                getTopContainer().getContext().put(RPAConst.LASTEXECUTERESULT, returnValue);
+                getTopContainer().getContext().put(RPAConst.LASTOUTPUTDATA, action.getOutputData());
+                getTopContainer()
+                    .getContext()
+                    .put(
+                        this.getClass().getSimpleName()
+                            + "["
+                            + this.getTag()
+                            + "]."
+                            + action.getClass().getSimpleName(),
+                        action.getOutputData());
+              });
+      log.info("    [" + getShowName() + "] 节点结束");
+    } catch (Exception ex) {
+      log.info("      [" + getShowName() + "] 发生错误：" + ex.getMessage());
+      if (this.getParentContainer().getOnErroAction().equals(OnErrorHandleEnum.BREAK)) {
+        return;
+      } else if (this.getParentContainer().getOnErroAction().equals(OnErrorHandleEnum.RUNACTION)) {
+        // TODO 未来实现OnErrorAction特性
+      }
+    }
 
     // 取下级连线节点
     List<LinkNodeModel> linkers = getAllChildren();

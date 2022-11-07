@@ -1,7 +1,7 @@
 {
   "bot": {
     "name": "AirHost房源同步RPA",
-    "classType": "",
+    "botType": "once_hotel_fetch_bot",
     "strategies": [
       {
         "type": "UnconditionalStrategy",

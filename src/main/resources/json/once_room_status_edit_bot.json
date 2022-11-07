@@ -1,7 +1,7 @@
 {
   "bot": {
-    "name": "AirHost房源同步RPA",
-    "classType": "",
+    "name": "AirHost编辑房源预订日历状态RPA",
+    "botType": "once_room_status_edit_bot",
     "strategies": [
       {
         "type": "UnconditionalStrategy",

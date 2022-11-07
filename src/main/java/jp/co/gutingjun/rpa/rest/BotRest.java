@@ -4,7 +4,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.undertow.util.DateUtils;
 import jp.co.gutingjun.common.pms.TreeNode;
-import jp.co.gutingjun.common.util.FileUtil;
 import jp.co.gutingjun.common.util.R;
 import jp.co.gutingjun.rpa.application.BotBus;
 import jp.co.gutingjun.rpa.model.bot.BotInstance;
@@ -16,11 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
-import java.net.URL;
 import java.util.*;
-
-import static com.xiaoleilu.hutool.util.ClassLoaderUtil.getClassLoader;
 
 /**
  * 机器人服务
@@ -47,11 +42,7 @@ public class BotRest {
   public R botRegister(@RequestBody String botContext) {
     try {
       IBot bot = BotBus.getInstance().botRegister(botContext);
-      if (bot == null) {
-        return R.responseByError(200, "Bot exists.");
-      } else {
-        return R.responseBySuccess("RPA bot [BotID:" + bot.getId() + "] registered.");
-      }
+      return R.responseBySuccess("RPA bot [BotID:" + bot.getId() + "] has been registered.");
     } catch (Exception e) {
       return R.responseByError(500, e.getMessage());
     }
@@ -149,26 +140,13 @@ public class BotRest {
   @ResponseBody
   public R regAndRunBot(@RequestBody String botContext) {
     try {
-      IBot bot = BotBus.getInstance().botRegister(botContext);
+      BotModel bot = BotBus.getInstance().botRegister(botContext);
       BotBus.getInstance().manualExecuteBot(bot.getId());
     } catch (Exception e) {
       return R.responseByError(500, e.getMessage());
     }
 
     return R.responseBySuccess();
-  }
-
-  @ApiOperation(value = "获取机器人构造模板", notes = "获取机器人构造模板")
-  @PostMapping(value = "/bottemplate")
-  @ResponseBody
-  public R getBotTemplate(@NotNull String templateName) {
-    URL url = getClassLoader().getResource("json/" + templateName);
-    try {
-      String fileContent = FileUtil.readFileAsString(url.getPath());
-      return R.responseBySuccess(fileContent);
-    } catch (IOException e) {
-      return R.responseByError(500, e.getMessage());
-    }
   }
 
   @ApiOperation(value = "机器人手工启动", notes = "机器人手工启动")

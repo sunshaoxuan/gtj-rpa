@@ -1,7 +1,7 @@
 {
   "bot": {
     "name": "AirHost订单同步RPA",
-    "classType": "",
+    "botType": "cycle_order_fetch_bot",
     "strategies": [
       {
         "type": "CycleStrategy",

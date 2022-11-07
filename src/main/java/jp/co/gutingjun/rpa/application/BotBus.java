@@ -22,10 +22,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -122,25 +119,39 @@ public class BotBus implements Serializable {
    * @throws Exception
    */
   public BotModel botRegister(String botContext) throws Exception {
-    BotModel newBot = new BasicBot(JsonUtils.json2Map(botContext));
-    AtomicBoolean added = new AtomicBoolean(false);
-    if (getInstance().getCandidateSet().size() == 0) {
-      getInstance().getCandidateSet().add(newBot);
-      added.set(true);
+    Map<String, Object> botSettings = JsonUtils.json2Map(botContext);
+    String botType = (String) ((Map<String, Object>) botSettings.get("bot")).get("botType");
+    BotModel bot = null;
+    if (BotBus.getInstance().getCandidateSet().stream()
+            .filter(cdt -> cdt.getBotType().equals(botType))
+            .count()
+        > 0) {
+      bot =
+          BotBus.getInstance().getCandidateSet().stream()
+              .filter(cdt -> cdt.getBotType().equals(botType))
+              .findFirst()
+              .get();
     } else {
-      getInstance()
-          .getCandidateSet()
-          .forEach(
-              candidate -> {
-                if (candidate.getClass().equals(newBot.getClass())) {
-                  if (!candidate.isSingleton()) {
-                    getInstance().getCandidateSet().add(newBot);
-                    added.set(true);
-                  }
-                }
-              });
+      bot = new BasicBot(botSettings);
+      AtomicBoolean hasBot = new AtomicBoolean(false);
+      if (getInstance().getCandidateSet().size() == 0) {
+        getInstance().getCandidateSet().add(bot);
+      } else {
+        for (BotModel candidate : getInstance().getCandidateSet()) {
+          if (candidate.getBotType().equals(bot.getBotType())) {
+            if (!candidate.isSingleton()) {
+              getInstance().getCandidateSet().add(bot);
+            }
+            hasBot.set(true);
+          }
+        }
+
+        if(!hasBot.get()){
+          getInstance().getCandidateSet().add(bot);
+        }
+      }
     }
-    return added.get() ? newBot : null;
+    return bot;
   }
 
   /** 扫描机器人执行缓冲，将缓存中的机器人推入执行线程 */
@@ -232,16 +243,21 @@ public class BotBus implements Serializable {
           .forEach(
               botModel -> {
                 if (Arrays.stream(botModel.getBotStrategy())
-                    .filter(strategy -> strategy instanceof CycleStrategy)
-                    .findFirst()
-                    .get()
-                    .validate(now, now)) {
-                  if (!(botModel.isSingleton()
-                      && getInstance().getExecutingBot().stream()
-                              .filter(runningBot -> runningBot.getId().equals(botModel.getId()))
-                              .count()
-                          > 0)) {
-                    getInstance().getCycleQualifiedCandidates().add(botModel);
+                        .filter(strategy -> strategy instanceof CycleStrategy)
+                        .count()
+                    > 0) {
+                  if (Arrays.stream(botModel.getBotStrategy())
+                      .filter(strategy -> strategy instanceof CycleStrategy)
+                      .findFirst()
+                      .get()
+                      .validate(now, now)) {
+                    if (!(botModel.isSingleton()
+                        && getInstance().getExecutingBot().stream()
+                                .filter(runningBot -> runningBot.getId().equals(botModel.getId()))
+                                .count()
+                            > 0)) {
+                      getInstance().getCycleQualifiedCandidates().add(botModel);
+                    }
                   }
                 }
               });

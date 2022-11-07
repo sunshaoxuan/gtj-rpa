@@ -52,6 +52,8 @@ public abstract class BotModel extends EventManager implements IBot {
   private boolean paused = false;
   /** 已停止 */
   private boolean stopped = false;
+  /** 机器人类型 */
+  private String botType = "";
 
   private IBotStrategy[] botStrategy;
   /** 动作查找器 */
@@ -91,7 +93,7 @@ public abstract class BotModel extends EventManager implements IBot {
   }
 
   private void setStrategyBySetting(Map<String, Object> botSettings) {
-    Map<String, Object> settings = (Map<String, Object>) botSettings.get("json/bot");
+    Map<String, Object> settings = (Map<String, Object>) botSettings.get("bot");
     if (settings.containsKey("strategies") && settings.get("strategies") instanceof List) {
       ((List) settings.get("strategies"))
           .stream()
@@ -165,7 +167,7 @@ public abstract class BotModel extends EventManager implements IBot {
     JobNodeModel currentNode;
     List<JobNodeModel> addedJobNodes = new ArrayList<>();
     List<String> fetchedJobNodes = new ArrayList<>();
-    Map<String, Object> settings = (Map<String, Object>) botSettings.get("json/bot");
+    Map<String, Object> settings = (Map<String, Object>) botSettings.get("bot");
     if (settings.containsKey("jobs") && settings.containsKey("linkers")) {
       // 有任务节点及连线，递归建树
       // 创建开始节点
@@ -271,6 +273,9 @@ public abstract class BotModel extends EventManager implements IBot {
                                     });
                               }
                               MapUtils.mapPutAll(newAction.getContext(), newJobNode.getContext());
+                              if (job.containsKey("inputdata")) {
+                                newAction.setInputData(job.get("inputdata"));
+                              }
                               newJobNode.appendAction(newAction);
                               linkNode.appendChild(newJobNode);
                               addedjobNodes.add(newJobNode);
@@ -303,8 +308,8 @@ public abstract class BotModel extends EventManager implements IBot {
   }
 
   private void setBasePropertyBySetting(Map<String, Object> botSettings) {
-    if (botSettings.containsKey("json/bot")) {
-      ((Map<String, Object>) botSettings.get("json/bot"))
+    if (botSettings.containsKey("bot")) {
+      ((Map<String, Object>) botSettings.get("bot"))
           .forEach((key, value) -> ObjectUtils.setFieldValue(this, key, value));
     }
 

@@ -1,5 +1,8 @@
 package jp.co.gutingjun.rpa.config;
 
+import com.google.common.base.Function;
+import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -13,9 +16,6 @@ import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.function.Predicate;
 
 import static com.google.common.collect.Lists.newArrayList;
 
@@ -23,13 +23,14 @@ import static com.google.common.collect.Lists.newArrayList;
  * describe:
  *
  * @author Jesse
+ * @date 2018/12/07
  */
 @EnableSwagger2
 @Configuration
 @Profile("sit")
 public class Swagger2Config {
   public static Predicate<RequestHandler> basePackage(final String basePackage) {
-    return input -> declaringClass(input).map(handlerPackage(basePackage)).orElse(true);
+    return input -> declaringClass(input).transform(handlerPackage(basePackage)).or(true);
   }
 
   private static Function<Class<?>, Boolean> handlerPackage(final String basePackage) {
@@ -46,10 +47,10 @@ public class Swagger2Config {
   }
 
   private static Optional<? extends Class<?>> declaringClass(RequestHandler input) {
-    return Optional.ofNullable(input.declaringClass());
+    return Optional.fromNullable(input.declaringClass());
   }
 
-  private List<SecurityScheme> securitySchemes() {
+  private List<ApiKey> securitySchemes() {
     return newArrayList(new ApiKey("Authorization", "Authorization", "header"));
   }
 
