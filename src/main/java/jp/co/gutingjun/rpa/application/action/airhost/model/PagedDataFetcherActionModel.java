@@ -63,10 +63,15 @@ public abstract class PagedDataFetcherActionModel extends WebClientActionModel {
       UnexpectedPage page =
           getWebClient()
               .getPage(
-                  url.replace(RPAConst.TAG_HOUSEID, String.valueOf(getHouseId()))
-                      .replace(RPAConst.TAG_REQUESTTIMES, "1")
+                  url.replace(RPAConst.TAG_REQUESTTIMES, "1")
                       .replace(RPAConst.TAG_STARTINDEX, "0")
-                      .replace(RPAConst.TAG_LENGTH, "1"));
+                      .replace(RPAConst.TAG_LENGTH, "1")
+                      .replace(
+                          RPAConst.TAG_BEGINDATE,
+                          ((Map<String, String>) getInputData()).get("beginDate"))
+                      .replace(
+                          RPAConst.TAG_ENDDATE,
+                          ((Map<String, String>) getInputData()).get("endDate")));
       WebResponse response = page.getWebResponse();
       if (response.getContentType().equals("application/json")) {
         String json = response.getContentAsString();
@@ -80,15 +85,20 @@ public abstract class PagedDataFetcherActionModel extends WebClientActionModel {
             page =
                 getWebClient()
                     .getPage(
-                        url.replace(RPAConst.TAG_HOUSEID, String.valueOf(getHouseId()))
-                            .replace(RPAConst.TAG_REQUESTTIMES, String.valueOf(i + 2))
+                        url.replace(RPAConst.TAG_REQUESTTIMES, String.valueOf(i + 2))
                             .replace(
                                 RPAConst.TAG_STARTINDEX,
                                 String.valueOf(
                                     i * (Integer) getContext().get(RPAConst.TAG_PAGESIZE)))
                             .replace(
                                 RPAConst.TAG_LENGTH,
-                                String.valueOf(getContext().get(RPAConst.TAG_PAGESIZE))));
+                                String.valueOf(getContext().get(RPAConst.TAG_PAGESIZE)))
+                            .replace(
+                                RPAConst.TAG_BEGINDATE,
+                                ((Map<String, String>) getInputData()).get("beginDate"))
+                            .replace(
+                                RPAConst.TAG_ENDDATE,
+                                ((Map<String, String>) getInputData()).get("endDate")));
             if (response.getContentType().equals("application/json")) {
               response = page.getWebResponse();
               json = response.getContentAsString();

@@ -60,6 +60,7 @@ public class BotInstance extends BotModel implements Callable<Long>, IContainer 
     this.setCreatedTime(botModel.getCreatedTime());
     this.setName(botModel.getName());
     this.setDescription(botModel.getDescription());
+    this.setBotStrategy(botModel.getBotStrategy());
     this.setJobNode((JobNodeModel) botModel.getJobNode().getRoot());
     setParentContainer(getJobNode(), this);
   }

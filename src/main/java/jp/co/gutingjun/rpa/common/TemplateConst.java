@@ -12,6 +12,8 @@ public class TemplateConst {
   public static final String GTJ_MANAGE_PASSCODE = "2981";
   /** 循环读订单 */
   public static final String RPATEMPLATE_CYCLE_ORDER_READ = "cycle_order_fetch_bot.json";
+  /** 单次读订单 */
+  public static final String RPATEMPLATE_ONCE_ORDER_READ = "once_order_fetch_bot.json";
   /** 单次读酒店详情 */
   public static final String RPATEMPLATE_ONCE_HOTEL_READ = "once_hotel_fetch_bot.json";
   /** 单次酒店资料更新 */

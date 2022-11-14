@@ -1,4 +1,4 @@
-package jp.co.gutingjun.rpa.rest;
+package jp.co.gutingjun.rpa.rest.dto;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

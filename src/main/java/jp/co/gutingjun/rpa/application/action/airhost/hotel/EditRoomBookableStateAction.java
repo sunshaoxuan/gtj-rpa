@@ -1,16 +1,14 @@
 package jp.co.gutingjun.rpa.application.action.airhost.hotel;
 
-import com.gargoylesoftware.htmlunit.HttpMethod;
-import com.gargoylesoftware.htmlunit.WebRequest;
+import com.gargoylesoftware.htmlunit.html.HtmlForm;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
-import com.gargoylesoftware.htmlunit.util.NameValuePair;
+import com.gargoylesoftware.htmlunit.html.HtmlSelect;
 import jp.co.gutingjun.rpa.application.action.airhost.login.UserPasswordLoginAction;
 import jp.co.gutingjun.rpa.common.RPAConst;
 import jp.co.gutingjun.rpa.model.action.WebClientActionModel;
+import org.apache.commons.lang.StringUtils;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 public class EditRoomBookableStateAction extends WebClientActionModel {
@@ -23,11 +21,7 @@ public class EditRoomBookableStateAction extends WebClientActionModel {
     getContext()
         .put(
             RPAConst.URL,
-            "https://cloud.airhost.co/zh/houses/"
-                + RPAConst.TAG_HOUSEID
-                + "/calendars/"
-                + RPAConst.TAG_ROOMTYPEID
-                + "/availability");
+            "https://cloud.airhost.co/zh/houses/" + RPAConst.TAG_HOUSEID + "/calendars");
     appendDependActionClasses(UserPasswordLoginAction.class);
   }
 
@@ -59,20 +53,67 @@ public class EditRoomBookableStateAction extends WebClientActionModel {
 
     try {
       String url = (String) getContext().get(RPAConst.URL);
-      url =
-          url.replace(RPAConst.TAG_HOUSEID, String.valueOf(getHouseId()))
-              .replace(RPAConst.TAG_ROOMTYPEID, String.valueOf(getRoomTypeId()));
-      WebRequest request = new WebRequest(new java.net.URL(url), HttpMethod.POST);
-      List<NameValuePair> data = new ArrayList<>();
-      Map<String, String> inputData = (Map<String, String>) getInputData();
-      if (inputData != null) {
-        inputData.forEach(
-            (key, value) -> {
-              data.add(new NameValuePair(key, value));
-            });
-      }
-      request.setRequestParameters(data);
-      HtmlPage page = getWebClient().getPage(request);
+      url = url.replace(RPAConst.TAG_HOUSEID, String.valueOf(getHouseId()));
+      HtmlPage page = getWebClient().getPage(url);
+      HtmlForm form =
+          (HtmlForm)
+              page.getElementsByTagName("form").stream()
+                  .filter(innerForm -> innerForm.getId().startsWith("edit_room_"))
+                  .findFirst()
+                  .get();
+      // 开始日期
+      form.getElementsByTagName("input").stream()
+          .filter(input -> input.getAttribute("name").equals("dtstart"))
+          .findFirst()
+          .get()
+          .setAttribute("value", ((Map<String, String>) getInputData()).get("dtstart"));
+      // 结束日期
+      form.getElementsByTagName("input").stream()
+          .filter(input -> input.getAttribute("name").equals("dtend"))
+          .findFirst()
+          .get()
+          .setAttribute("value", ((Map<String, String>) getInputData()).get("dtend"));
+      // 预定状态
+      HtmlSelect select =
+          (HtmlSelect)
+              form.getElementsByTagName("select").stream()
+                  .filter(input -> input.getAttribute("name").equals("status"))
+                  .findFirst()
+                  .get();
+      select.getOptions().stream()
+          .filter(
+              option ->
+                  option
+                      .getValueAttribute()
+                      .equals(((Map<String, String>) getInputData()).get("status")))
+          .findFirst()
+          .get()
+          .setSelected(true);
+      // 预订房间
+      select =
+          (HtmlSelect)
+              form.getElementsByTagName("select").stream()
+                  .filter(input -> input.getAttribute("name").equals("room_unit_id"))
+                  .findFirst()
+                  .get();
+      select.getOptions().stream()
+          .filter(
+              option ->
+                  option
+                      .getValueAttribute()
+                      .equals(
+                          (StringUtils.isBlank(
+                                  ((Map<String, String>) getInputData()).get("room_unit_id"))
+                              ? ""
+                              : ((Map<String, String>) getInputData()).get("room_unit_id"))))
+          .findFirst()
+          .get()
+          .setSelected(true);
+      form.getElementsByTagName("input").stream()
+          .filter(input -> input.getAttribute("type").equals("submit"))
+          .findFirst()
+          .get()
+          .click();
       getWebClient().waitForBackgroundJavaScript(3000);
     } catch (IOException e) {
       throw new RuntimeException(e.getMessage());

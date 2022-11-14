@@ -11,6 +11,7 @@ import jp.co.gutingjun.rpa.model.bot.BotModel;
 import jp.co.gutingjun.rpa.model.bot.IBot;
 import jp.co.gutingjun.rpa.model.jobflow.condition.LogicalConditionModel;
 import jp.co.gutingjun.rpa.model.jobflow.node.BaseLinkNode;
+import jp.co.gutingjun.rpa.rest.dto.BotInfoDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.web.bind.annotation.*;

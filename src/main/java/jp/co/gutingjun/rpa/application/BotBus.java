@@ -12,6 +12,7 @@ import jp.co.gutingjun.rpa.model.jobflow.node.JobNodeModel;
 import jp.co.gutingjun.rpa.model.log.LogData;
 import jp.co.gutingjun.rpa.model.log.Logger;
 import jp.co.gutingjun.rpa.model.strategy.CycleStrategy;
+import jp.co.gutingjun.rpa.model.strategy.UnconditionalStrategy;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -146,7 +147,7 @@ public class BotBus implements Serializable {
           }
         }
 
-        if(!hasBot.get()){
+        if (!hasBot.get()) {
           getInstance().getCandidateSet().add(bot);
         }
       }
@@ -299,6 +300,20 @@ public class BotBus implements Serializable {
                     .message("单实例线程结束")
                     .build());
             getInstance().getExecutingBot().remove(runningBot);
+
+            // 如果是无条件运行一次的机器人，运行后从候选人中删除
+            if (Arrays.stream(runningBot.getBotStrategy())
+                    .filter(
+                        stt ->
+                            stt.getClass()
+                                .getSimpleName()
+                                .equals(UnconditionalStrategy.class.getSimpleName()))
+                    .count()
+                > 0) {
+              getInstance()
+                  .getCandidateSet()
+                  .removeIf(bot -> bot.getId().equals(runningBot.getId()));
+            }
           } catch (Exception ex) {
             Logger.log(
                 LogData.builder().logTime(LocalDateTime.now()).message(ex.getMessage()).build());

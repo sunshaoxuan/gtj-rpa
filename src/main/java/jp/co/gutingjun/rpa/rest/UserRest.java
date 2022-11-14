@@ -4,6 +4,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import jp.co.gutingjun.common.util.R;
 import jp.co.gutingjun.rpa.inf.IUserService;
+import jp.co.gutingjun.rpa.rest.dto.UserDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
